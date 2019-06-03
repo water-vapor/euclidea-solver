@@ -61,7 +61,7 @@ func Solve(board *geom.Board, goal *geom.Goal, sequence string, name string, rec
 				pt1 := elem1.(*geom.Point)
 				pt2 := elem2.(*geom.Point)
 				// same point object
-				if pt1 == pt2 {
+				if pt1.Equal(pt2) {
 					continue
 				}
 				c := geom.NewCircleByPoint(pt1, pt2)
@@ -97,8 +97,14 @@ func Solve(board *geom.Board, goal *geom.Goal, sequence string, name string, rec
 			for _, pt := range pts {
 				newBoard := board.Clone()
 				newBoard.AddPoint(pt)
-				// proceed silently
-				Solve(newBoard, goal, sequence, name, recursionLevel, success, wg, parallelLevel)
+				// proceed without decreasing sequence
+				if useParallel && recursionLevel == parallelLevel-1 {
+					wg.Add(1)
+					go Solve(newBoard, goal, sequence, name, recursionLevel+1, success, wg, parallelLevel)
+					count++
+				} else {
+					Solve(newBoard, goal, sequence, name, recursionLevel+1, success, wg, parallelLevel)
+				}
 				if (useParallel && recursionLevel >= parallelLevel) || !useParallel {
 					// return on success
 					select {
@@ -151,8 +157,14 @@ func Solve(board *geom.Board, goal *geom.Goal, sequence string, name string, rec
 			for _, pt := range pts {
 				newBoard := board.Clone()
 				newBoard.AddPoint(pt)
-				// proceed silently
-				Solve(newBoard, goal, sequence, name, recursionLevel, success, wg, parallelLevel)
+				// proceed without decreasing sequence
+				if useParallel && recursionLevel == parallelLevel-1 {
+					wg.Add(1)
+					go Solve(newBoard, goal, sequence, name, recursionLevel+1, success, wg, parallelLevel)
+					count++
+				} else {
+					Solve(newBoard, goal, sequence, name, recursionLevel+1, success, wg, parallelLevel)
+				}
 				if (useParallel && recursionLevel >= parallelLevel) || !useParallel {
 					// return on success
 					select {
