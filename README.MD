@@ -2,7 +2,7 @@
 Euclidea Solver is a brute force search program aimed to search for short solutions of straightedge and compass construction problems in [Euclidea](https://www.euclidea.xyz). 
 It performs searches by traveling the whole sensible search space with depth-first search.
 ### Usage
-`euclidea-solver [-p[=parallel level]] <chapter number> <problem number>"`
+`euclidea-solver [-p[=parallel level]] <chapter number> <problem number>`
 
 `chapter number` and `problem number` refers to corresponding problems in the website. Sequential search is used by default.
 `-p` is equivalent to `-p=1`, this parallel level refers to the level in DFS. The number of go routines spawned is calculated 
