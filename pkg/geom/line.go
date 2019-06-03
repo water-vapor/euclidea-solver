@@ -61,9 +61,9 @@ func NewLineFromHalfLine(h *HalfLine) *Line {
 }
 
 func (l *Line) Serialize() interface{} {
-	ca := int64(math.Round(l.a * configs.HashPrecision))
-	cb := int64(math.Round(l.b * configs.HashPrecision))
-	cc := int64(math.Round(l.c * configs.HashPrecision))
+	ca := int64(math.Round(l.a))
+	cb := int64(math.Round(l.b))
+	cc := int64(math.Round(l.c))
 	return (ca*configs.Prime+cb)*configs.Prime + cc
 }
 

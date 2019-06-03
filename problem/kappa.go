@@ -4,7 +4,7 @@ import (
 	"github.com/water-vapor/euclidea-solver/pkg/geom"
 )
 
-// Board 12: Center of Rotation
+// Problem 12: Center of Rotation
 func centerOfRotation() *Statement {
 	pt1 := geom.NewPoint(-5, 0)
 	pt2 := geom.NewPoint(0, 5)

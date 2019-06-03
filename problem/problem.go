@@ -18,8 +18,18 @@ func GetProblemByID(chapter, number int) *Statement {
 	switch problemID {
 	case 101:
 		return angelOf60Degree()
+	case 102:
+		return perpendicularBisector()
+	case 106:
+		return circleCenter()
+	case 107:
+		return inscribedSquare()
 	case 1012:
 		return centerOfRotation()
+	case 1508:
+		return lineCircleIntersection2()
+	case 1510:
+		return angelOf3Degree()
 	default:
 		panic("Invalid Problem ID, or Problem not implemented.")
 	}
