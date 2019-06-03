@@ -1,5 +1,4 @@
 # Eulidea Solver
-------
 Euclidea Solver is a brute force search program aimed to search for short solutions of straightedge and compass construction problems in [Euclidea](https://www.euclidea.xyz). 
 It performs searches by traveling the whole sensible search space with depth-first search.
 ### Usage
