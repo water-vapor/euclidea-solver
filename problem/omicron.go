@@ -34,5 +34,5 @@ func angelOf3Degree() *Statement {
 	target := geom.NewGoal()
 	target.Lines.Add(geom.NewLineFromTwoPoints(pt1, pt2))
 
-	return NewStatement(problem, target, "OOOIIOI", "Line-Circle Intersection 2")
+	return NewStatement(problem, target, "OOOIIOI", "Angle of 3 Degree")
 }
