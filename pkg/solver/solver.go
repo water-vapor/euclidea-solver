@@ -43,9 +43,17 @@ func Solve(board *geom.Board, goal *geom.Goal, sequence string, name string, rec
 		if solved {
 			_ = board.GeneratePlot(name + "_" + strconv.FormatInt(time.Now().Unix(), 10) + ".png")
 			// close the success channel to indicate success, all other routines should terminate
-			close(success)
-			return
+			// return on success
+			select {
+			// if already closed, just return
+			case <-success:
+				return
+			default:
+				close(success)
+				return
+			}
 		}
+
 		if len(sequence) == 0 {
 			//_ = board.GeneratePlot("tmp_" + strconv.FormatInt(rand.Int63(), 10) + ".png")
 			return
