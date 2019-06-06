@@ -60,6 +60,23 @@ func NewLineFromHalfLine(h *HalfLine) *Line {
 	return NewLineFromDirection(h.point, h.direction)
 }
 
+// Angle bisector of pt1,pt2,pt3
+func NewLineAsAngleBisector(pt1, pt2, pt3 *Point) *Line {
+	s1 := NewSegment(pt1, pt2)
+	s2 := NewSegment(pt2, pt3)
+	d1 := s1.Length()
+	d2 := s2.Length()
+	inters1 := pt1
+	if d1 > d2 {
+		d1, d2 = d2, d1
+		s1, s2 = s2, s1
+		inters1 = pt3
+	}
+	c := NewCircleByRadius(pt2, d1)
+	inters2 := c.IntersectSegment(s2).Solutions[0]
+	return NewSegment(inters1, inters2).Bisector()
+}
+
 func (l *Line) Serialize() interface{} {
 	ca := int64(math.Round(l.a))
 	cb := int64(math.Round(l.b))
@@ -116,6 +133,18 @@ func (l *Line) IntersectSegment(s *Segment) *Intersection {
 
 func (l *Line) GetNormalVector() *Vector2D {
 	return NewVector2D(l.a, l.b)
+}
+
+func (l *Line) GetParallelVector() *Vector2D {
+	return NewVector2D(-l.b, l.a)
+}
+
+func (l *Line) GetTangentLineWithPoint(pt *Point) *Line {
+	return NewLineFromDirection(pt, l.GetNormalVector())
+}
+
+func (l *Line) GetParallelLineWithPoint(pt *Point) *Line {
+	return NewLineFromDirection(pt, l.GetParallelVector())
 }
 
 func (l *Line) IntersectCircle(c *Circle) *Intersection {

@@ -77,3 +77,14 @@ func TestHashSet_Dict(t *testing.T) {
 		}
 	}
 }
+
+func TestHashSet_Values(t *testing.T) {
+	a := NewHashSet()
+	pt1 := newTestPoint(1, 2)
+	pt2 := newTestPoint(3, 4)
+	a.Add(pt2)
+	a.Add(pt1)
+	if len(a.Values()) != 2 {
+		t.Error("values() error")
+	}
+}

@@ -25,5 +25,5 @@ func centerOfRotation() *Statement {
 	target := geom.NewGoal()
 	target.Points.Add(result)
 
-	return NewStatement(board, target, "OOIOI", "Center Of Rotation")
+	return NewStatement(board, target, "OOIOI", "10.12 Center Of Rotation")
 }

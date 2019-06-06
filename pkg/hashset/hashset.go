@@ -40,9 +40,20 @@ func (hs *HashSet) Contains(key Serializable) bool {
 	return false
 }
 
-// Return the dict for iteration
+// Returns the dict for iteration
 func (hs *HashSet) Dict() map[interface{}]interface{} {
 	return hs.m
+}
+
+// Returns a slice of all objects
+func (hs *HashSet) Values() []interface{} {
+	ret := make([]interface{}, len(hs.m))
+	index := 0
+	for _, elem := range hs.m {
+		ret[index] = elem
+		index++
+	}
+	return ret
 }
 
 func (hs *HashSet) Empty() bool {
