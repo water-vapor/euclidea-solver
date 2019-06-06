@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/water-vapor/euclidea-solver)](https://goreportcard.com/report/github.com/water-vapor/euclidea-solver)
+[![Build Status](https://travis-ci.org/water-vapor/euclidea-solver.svg?branch=master)](https://travis-ci.org/water-vapor/euclidea-solver)
 # Eulidea Solver
 Euclidea Solver is a brute force search program aimed to search for short solutions of straightedge and compass construction problems in [Euclidea](https://www.euclidea.xyz). 
 It performs searches by traveling the whole sensible search space with depth-first search.
