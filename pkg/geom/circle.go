@@ -140,12 +140,11 @@ func (c *Circle) IntersectHalfLine(h *HalfLine) *Intersection {
 			return intersection
 		}
 		return NewIntersection(pt1)
-	} else {
-		if pt2.InHalfLineRange(h) {
-			return NewIntersection(pt2)
-		}
-		return NewIntersection()
 	}
+	if pt2.InHalfLineRange(h) {
+		return NewIntersection(pt2)
+	}
+	return NewIntersection()
 }
 
 // IntersectSegment returns intersections with a segment
@@ -171,12 +170,11 @@ func (c *Circle) IntersectSegment(s *Segment) *Intersection {
 			return intersection
 		}
 		return NewIntersection(pt1)
-	} else {
-		if pt2.InSegmentRange(s) {
-			return NewIntersection(pt2)
-		}
-		return NewIntersection()
 	}
+	if pt2.InSegmentRange(s) {
+		return NewIntersection(pt2)
+	}
+	return NewIntersection()
 }
 
 // GetRandomPoint returns a random point on the circle
