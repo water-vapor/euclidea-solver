@@ -30,9 +30,9 @@ func NewSegment(pt1, pt2 *Point) *Segment {
 	}
 	if pt1First {
 		return &Segment{point1: pt1, point2: pt2}
-	} else {
-		return &Segment{point1: pt2, point2: pt1}
 	}
+	return &Segment{point1: pt2, point2: pt1}
+
 }
 
 // NewSegmentFromDirection creates a segment with one point, a direction and length

@@ -138,15 +138,13 @@ func (c *Circle) IntersectHalfLine(h *HalfLine) *Intersection {
 	if pt1.InHalfLineRange(h) {
 		if pt2.InHalfLineRange(h) {
 			return intersection
-		} else {
-			return NewIntersection(pt1)
 		}
+		return NewIntersection(pt1)
 	} else {
 		if pt2.InHalfLineRange(h) {
 			return NewIntersection(pt2)
-		} else {
-			return NewIntersection()
 		}
+		return NewIntersection()
 	}
 }
 
@@ -171,15 +169,13 @@ func (c *Circle) IntersectSegment(s *Segment) *Intersection {
 	if pt1.InSegmentRange(s) {
 		if pt2.InSegmentRange(s) {
 			return intersection
-		} else {
-			return NewIntersection(pt1)
 		}
+		return NewIntersection(pt1)
 	} else {
 		if pt2.InSegmentRange(s) {
 			return NewIntersection(pt2)
-		} else {
-			return NewIntersection()
 		}
+		return NewIntersection()
 	}
 }
 
