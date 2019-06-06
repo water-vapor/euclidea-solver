@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// Solve implements the DFS search algorithm
 func Solve(board *geom.Board, goal *geom.Goal, sequence string, name string, recursionLevel int,
 	success chan interface{}, wg *sync.WaitGroup, parallelLevel int) {
 	// Checks if required objects have been found.

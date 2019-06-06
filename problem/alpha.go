@@ -7,7 +7,7 @@ import (
 
 // Problem 1: Angel Of 60 Degree
 func angelOf60Degree() *Statement {
-	problem := geom.NewGeomBoard()
+	problem := geom.NewBoard()
 	pt1 := geom.NewPoint(0, 0)
 	pt2 := geom.NewPoint(1, math.Sqrt(3))
 
@@ -21,7 +21,7 @@ func angelOf60Degree() *Statement {
 
 //Problem 2: Perpendicular Bisector
 func perpendicularBisector() *Statement {
-	problem := geom.NewGeomBoard()
+	problem := geom.NewBoard()
 	pt1 := geom.NewPoint(-1, 0)
 	pt2 := geom.NewPoint(1, 0)
 	s := geom.NewSegment(pt1, pt2)
@@ -36,7 +36,7 @@ func perpendicularBisector() *Statement {
 
 //Problem 3: Midpoint
 func midpoint() *Statement {
-	problem := geom.NewGeomBoard()
+	problem := geom.NewBoard()
 	pt1 := geom.NewPoint(-1, 0)
 	pt2 := geom.NewPoint(1, 0)
 	problem.AddPoint(pt1)
@@ -50,7 +50,7 @@ func midpoint() *Statement {
 
 //Problem 4: Circle in Square
 func circleInSquare() *Statement {
-	problem := geom.NewGeomBoard()
+	problem := geom.NewBoard()
 	pt1 := geom.NewPoint(-1, -1)
 	pt2 := geom.NewPoint(-1, 1)
 	pt3 := geom.NewPoint(1, 1)
@@ -75,7 +75,7 @@ func circleInSquare() *Statement {
 
 //Problem 5: Rhombus in Rectangle
 func rhombusInRectangle() *Statement {
-	problem := geom.NewGeomBoard()
+	problem := geom.NewBoard()
 	pt1 := geom.NewPoint(0, 0)
 	pt2 := geom.NewPoint(3, 0)
 	pt3 := geom.NewPoint(3, math.Sqrt(3))
@@ -105,7 +105,7 @@ func rhombusInRectangle() *Statement {
 
 //Problem 6: Circle Center
 func circleCenter() *Statement {
-	problem := geom.NewGeomBoard()
+	problem := geom.NewBoard()
 	pt1 := geom.NewPoint(0, 0)
 	c := geom.NewCircleByRadius(pt1, 2)
 
@@ -119,7 +119,7 @@ func circleCenter() *Statement {
 //Problem 7: Inscribed Square
 func inscribedSquare() *Statement {
 	// the last two unnecessary lines are removed
-	problem := geom.NewGeomBoard()
+	problem := geom.NewBoard()
 	pt1 := geom.NewPoint(0, 0)
 	c := geom.NewCircleByRadius(pt1, 2)
 

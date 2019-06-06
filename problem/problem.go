@@ -2,7 +2,7 @@ package problem
 
 import "github.com/water-vapor/euclidea-solver/pkg/geom"
 
-// A type to describe a problem. Geometry objects in Board is given, objects in Target is the goal.
+// Statement is a type to describe a problem. Geometry objects in Board is given, objects in Target is the goal.
 // Sequence is the given official hint, name is the problem name
 // O: Circle
 // I: Line
@@ -19,10 +19,12 @@ type Statement struct {
 	Name     string
 }
 
+// NewStatement returns a new problem statement
 func NewStatement(board *geom.Board, target *geom.Goal, sequence string, name string) *Statement {
 	return &Statement{board, target, sequence, name}
 }
 
+// GetProblemByID returns the construction of a problem with given ID
 func GetProblemByID(chapter, number int) *Statement {
 	problemID := 100*chapter + number
 	switch problemID {

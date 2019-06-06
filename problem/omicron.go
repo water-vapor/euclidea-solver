@@ -4,7 +4,7 @@ import "github.com/water-vapor/euclidea-solver/pkg/geom"
 
 //Problem 8: Line-Circle Intersection 2
 func lineCircleIntersection2() *Statement {
-	problem := geom.NewGeomBoard()
+	problem := geom.NewBoard()
 	pt1 := geom.NewPoint(0, 0)
 	c := geom.NewCircleByRadius(pt1, 2)
 	pt2 := geom.NewPoint(-4, 0)
@@ -23,7 +23,7 @@ func lineCircleIntersection2() *Statement {
 
 //Problem 10: Angle of 3 Degree
 func angelOf3Degree() *Statement {
-	problem := geom.NewGeomBoard()
+	problem := geom.NewBoard()
 	pt1 := geom.NewPoint(0, 0)
 	pt2 := geom.NewPoint(1, 0.0524077792830412040388058244740)
 	hl := geom.NewHalfLineFromDirection(pt1, geom.NewVector2D(1, 0))

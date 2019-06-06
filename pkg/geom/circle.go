@@ -7,29 +7,34 @@ import (
 	"math/rand"
 )
 
-// A circle is uniquely determined by its center point and radius
+// Circle is a circle is uniquely determined by its center point and radius
 type Circle struct {
 	hashset.Serializable
 	center *Point
 	r      float64
 }
 
+// NewCircleByPoint creates a circle by its center and a point on its side
 func NewCircleByPoint(center, onSide *Point) *Circle {
 	return &Circle{center: center, r: NewSegment(center, onSide).Length()}
 }
 
+// NewCircleByRadius creates a circle by its center and its radius
 func NewCircleByRadius(center *Point, r float64) *Circle {
 	return &Circle{center: center, r: r}
 }
 
+// GetCenter returns the center of the circle
 func (c *Circle) GetCenter() *Point {
 	return c.center
 }
 
+// GetRadius returns the radius of the circle
 func (c *Circle) GetRadius() float64 {
 	return c.r
 }
 
+// Serialize returns the hash of the circle
 func (c *Circle) Serialize() interface{} {
 	cx := int64(math.Round(c.center.x * configs.HashPrecision))
 	cy := int64(math.Round(c.center.y * configs.HashPrecision))
@@ -37,10 +42,12 @@ func (c *Circle) Serialize() interface{} {
 	return (cx*configs.Prime+cy)*configs.Prime + cr
 }
 
+// ContainsPoint checks if a point is on the circle
 func (c *Circle) ContainsPoint(pt *Point) bool {
 	return math.Abs(NewSegment(pt, c.center).Length()-c.r) < configs.Tolerance
 }
 
+// IntersectLine returns the intersections with a line
 func (c *Circle) IntersectLine(l *Line) *Intersection {
 	distNumer := l.a*c.center.x + l.b*c.center.y + l.c
 	distDenomSquare := l.a*l.a + l.b*l.b
@@ -75,6 +82,7 @@ func (c *Circle) IntersectLine(l *Line) *Intersection {
 	return NewIntersection(NewPoint(pt1x, pt1y), NewPoint(pt2x, pt2y))
 }
 
+// IntersectCircle returns the intersections with another circle
 func (c *Circle) IntersectCircle(c2 *Circle) *Intersection {
 	// center same, return no intersection
 	if c.center.Equal(c2.center) {
@@ -109,6 +117,7 @@ func (c *Circle) IntersectCircle(c2 *Circle) *Intersection {
 	return NewIntersection(NewPoint(pt1x, pt1y), NewPoint(pt2x, pt2y))
 }
 
+// IntersectHalfLine returns intersections with a half line
 func (c *Circle) IntersectHalfLine(h *HalfLine) *Intersection {
 	// intersect as if it is a line
 	intersection := c.IntersectLine(NewLineFromHalfLine(h))
@@ -141,6 +150,7 @@ func (c *Circle) IntersectHalfLine(h *HalfLine) *Intersection {
 	}
 }
 
+// IntersectSegment returns intersections with a segment
 func (c *Circle) IntersectSegment(s *Segment) *Intersection {
 	// intersect as if it is a line
 	intersection := c.IntersectLine(NewLineFromSegment(s))
@@ -173,7 +183,7 @@ func (c *Circle) IntersectSegment(s *Segment) *Intersection {
 	}
 }
 
-// Get a random point on the circle
+// GetRandomPoint returns a random point on the circle
 func (c *Circle) GetRandomPoint() *Point {
 	// random number from -1 to 1
 	x := rand.Float64()*2 - 1

@@ -18,7 +18,7 @@ func centerOfRotation() *Statement {
 	bisect2 := geom.NewSegment(pt2, pt4).Bisector()
 	result := bisect1.IntersectLine(bisect2).Solutions[0]
 
-	board := geom.NewGeomBoard()
+	board := geom.NewBoard()
 	board.AddSegment(s1)
 	board.AddSegment(s2)
 

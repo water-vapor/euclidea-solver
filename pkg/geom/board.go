@@ -8,7 +8,7 @@ import (
 	"math"
 )
 
-// A geometry board containing all geometry objects
+// Board is a geometry board containing all geometry objects
 type Board struct {
 	Points    *hashset.HashSet
 	Lines     *hashset.HashSet
@@ -17,12 +17,14 @@ type Board struct {
 	Segments  *hashset.HashSet
 }
 
-func NewGeomBoard() *Board {
+// NewBoard creates an empty geometry board
+func NewBoard() *Board {
 	return &Board{hashset.NewHashSet(), hashset.NewHashSet(), hashset.NewHashSet(), hashset.NewHashSet(), hashset.NewHashSet()}
 }
 
+// Clone deep copies a geometry board
 func (gb *Board) Clone() *Board {
-	ret := NewGeomBoard()
+	ret := NewBoard()
 	ret.Points = gb.Points.Clone()
 	ret.Lines = gb.Lines.Clone()
 	ret.Circles = gb.Circles.Clone()
@@ -31,7 +33,7 @@ func (gb *Board) Clone() *Board {
 	return ret
 }
 
-// Add a point and do nothing
+// AddPoint adds a point, do nothing else
 func (gb *Board) AddPoint(pt *Point) {
 	if math.Abs(pt.x) > configs.MaxPointCoord || math.Abs(pt.y) > configs.MaxPointCoord {
 		return
@@ -39,19 +41,20 @@ func (gb *Board) AddPoint(pt *Point) {
 	gb.Points.Add(pt)
 }
 
-// Add a half line and its end point, do nothing
+// AddHalfLine adds a half line and its end point, do nothing else
 func (gb *Board) AddHalfLine(h *HalfLine) {
 	gb.AddPoint(h.point)
 	gb.HalfLines.Add(h)
 }
 
-// Add a segment and its end points, do nothing
+// AddSegment adds a segment and its end points, do nothing else
 func (gb *Board) AddSegment(s *Segment) {
 	gb.AddPoint(s.point1)
 	gb.AddPoint(s.point2)
 	gb.Segments.Add(s)
 }
 
+// AddCircle adds a circle and calculates its intersections with existing objects
 func (gb *Board) AddCircle(c *Circle) {
 	// calculate new intersection points
 	for _, elem := range gb.Circles.Dict() {
@@ -86,6 +89,7 @@ func (gb *Board) AddCircle(c *Circle) {
 	gb.Circles.Add(c)
 }
 
+// AddLine adds a line and calculates its intersections with existing objects
 func (gb *Board) AddLine(l *Line) {
 	// calculate new intersection points
 	for _, elem := range gb.Circles.Dict() {
@@ -119,7 +123,7 @@ func (gb *Board) AddLine(l *Line) {
 	gb.Lines.Add(l)
 }
 
-// get a random point on each geometry object
+// GenerateRandomPoints returns a set of random points, from each geometry object
 func (gb *Board) GenerateRandomPoints() []*Point {
 	pts := make([]*Point, 0)
 	for _, elem := range gb.Circles.Dict() {
@@ -141,6 +145,7 @@ func (gb *Board) GenerateRandomPoints() []*Point {
 	return pts
 }
 
+// GeneratePlot creates a plot file with fileName
 func (gb *Board) GeneratePlot(fileName string) error {
 	dc := gg.NewContext(configs.ImageSize, configs.ImageSize)
 	// p.Title.Text = "Graphics"

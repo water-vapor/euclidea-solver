@@ -7,12 +7,13 @@ import (
 	"math/rand"
 )
 
-// A segment is uniquely determined by its sorted endpoints
+// Segment is uniquely determined by its sorted endpoints
 type Segment struct {
 	hashset.Serializable
 	point1, point2 *Point
 }
 
+// NewSegment creates a segment from two points
 func NewSegment(pt1, pt2 *Point) *Segment {
 	pt1First := false
 	if pt1.Equal(pt2) {
@@ -34,16 +35,19 @@ func NewSegment(pt1, pt2 *Point) *Segment {
 	}
 }
 
+// NewSegmentFromDirection creates a segment with one point, a direction and length
 func NewSegmentFromDirection(start *Point, direction *Vector2D, length float64) *Segment {
 	direction.SetLength(length)
 	pt2 := NewPoint(start.x+direction.x, start.y+direction.y)
 	return NewSegment(start, pt2)
 }
 
+// GetEndPoints returns both end points of a segment
 func (s *Segment) GetEndPoints() (*Point, *Point) {
 	return s.point1, s.point2
 }
 
+// Serialize returns the hash of the segment
 func (s *Segment) Serialize() interface{} {
 	cx1 := int64(math.Round(s.point1.x * configs.HashPrecision))
 	cy1 := int64(math.Round(s.point1.y * configs.HashPrecision))
@@ -52,6 +56,7 @@ func (s *Segment) Serialize() interface{} {
 	return ((cx1*configs.Prime+cy1)*configs.Prime+cx2)*configs.Prime + cy2
 }
 
+// PointInRange checks whether a point is in the coordinates range of the segment
 func (s *Segment) PointInRange(pt *Point) bool {
 	// range based test
 	if pt.x < s.point1.x-configs.Tolerance || pt.x > s.point2.x+configs.Tolerance {
@@ -66,6 +71,7 @@ func (s *Segment) PointInRange(pt *Point) bool {
 	return true
 }
 
+// ContainsPoint checks if a point is on the segment
 func (s *Segment) ContainsPoint(pt *Point) bool {
 	if !s.PointInRange(pt) {
 		return false
@@ -73,14 +79,17 @@ func (s *Segment) ContainsPoint(pt *Point) bool {
 	return NewLineFromSegment(s).ContainsPoint(pt)
 }
 
+// IntersectLine returns intersections with a line
 func (s *Segment) IntersectLine(l *Line) *Intersection {
 	return l.IntersectSegment(s)
 }
 
+// IntersectHalfLine returns intersections with a half line
 func (s *Segment) IntersectHalfLine(h *HalfLine) *Intersection {
 	return h.IntersectSegment(s)
 }
 
+// IntersectSegment returns intersections with a segment
 func (s *Segment) IntersectSegment(s2 *Segment) *Intersection {
 	// intersect as if it is a line
 	intersection := s.IntersectLine(NewLineFromSegment(s2))
@@ -96,22 +105,26 @@ func (s *Segment) IntersectSegment(s2 *Segment) *Intersection {
 	return NewIntersection()
 }
 
+// IntersectCircle returns intersections with a circle
 func (s *Segment) IntersectCircle(c *Circle) *Intersection {
 	return c.IntersectSegment(s)
 }
 
+// Length returns the length of the segment
 func (s *Segment) Length() float64 {
 	dx := s.point2.x - s.point1.x
 	dy := s.point2.y - s.point1.y
 	return math.Sqrt(dx*dx + dy*dy)
 }
 
+// Bisector returns a line as the bisector of the segment
 func (s *Segment) Bisector() *Line {
 	pt := NewPoint((s.point1.x+s.point2.x)/2, (s.point1.y+s.point2.y)/2)
 	v := NewVector2DFromTwoPoints(s.point1, s.point2).NormalVector()
 	return NewLineFromDirection(pt, v)
 }
 
+// GetRandomPoint returns a random point on the segment
 func (s *Segment) GetRandomPoint() *Point {
 	v := NewVector2DFromTwoPoints(s.point1, s.point2)
 	v.SetLength(rand.Float64() * v.Length())

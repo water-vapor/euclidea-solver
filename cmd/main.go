@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"time"
 )
 
 func printUsageAndExit() {
@@ -71,6 +72,9 @@ func main() {
 		fmt.Println("Parallel level too deep for this problem, using ", len(ps.Sequence)-1)
 		parallelLevel = len(ps.Sequence) - 1
 	}
+
+	start := time.Now()
+
 	solver.Solve(ps.Board, ps.Target, ps.Sequence, ps.Name, 0, success, &wg, parallelLevel)
 
 	// if parallel is used, wait
@@ -84,4 +88,7 @@ func main() {
 	default:
 		fmt.Println("Solution not found.")
 	}
+
+	end := time.Since(start)
+	fmt.Println("Took", end)
 }

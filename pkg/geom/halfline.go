@@ -7,28 +7,32 @@ import (
 	"math/rand"
 )
 
-// A half line is determined uniquely by its starting point and normalized direction vector
+// HalfLine is determined uniquely by its starting point and normalized direction vector
 type HalfLine struct {
 	hashset.Serializable
 	point     *Point
 	direction *Vector2D
 }
 
+// NewHalfLineFromTwoPoints creates a half line from two points, with source as end point
 func NewHalfLineFromTwoPoints(source *Point, direction *Point) *HalfLine {
 	v := NewVector2D(direction.x-source.x, direction.y-source.y)
 	v.Normalize()
 	return &HalfLine{point: source, direction: v}
 }
 
+// NewHalfLineFromDirection creates a half line from its end point and a direction
 func NewHalfLineFromDirection(pt *Point, direction *Vector2D) *HalfLine {
 	direction.Normalize()
 	return &HalfLine{point: pt, direction: direction}
 }
 
+// GetEndPoint returns its end point
 func (h *HalfLine) GetEndPoint() *Point {
 	return h.point
 }
 
+// Serialize returns the hash of the half line
 func (h *HalfLine) Serialize() interface{} {
 	cx := int64(math.Round(h.direction.x * configs.HashPrecision))
 	cy := int64(math.Round(h.direction.y * configs.HashPrecision))
@@ -37,6 +41,7 @@ func (h *HalfLine) Serialize() interface{} {
 	return ((cx*configs.Prime+cy)*configs.Prime+cx0)*configs.Prime + cy0
 }
 
+// PointInRange checks if a point is in the coordinates of a half line
 func (h *HalfLine) PointInRange(pt *Point) bool {
 	if math.Abs(h.direction.x) < configs.Tolerance {
 		// line is vertical
@@ -57,6 +62,7 @@ func (h *HalfLine) PointInRange(pt *Point) bool {
 	return true
 }
 
+// ContainsPoint checks if a point is on the half line
 func (h *HalfLine) ContainsPoint(pt *Point) bool {
 	if !h.PointInRange(pt) {
 		return false
@@ -64,10 +70,12 @@ func (h *HalfLine) ContainsPoint(pt *Point) bool {
 	return NewLineFromHalfLine(h).ContainsPoint(pt)
 }
 
+// IntersectLine returns intersections with a line
 func (h *HalfLine) IntersectLine(l *Line) *Intersection {
 	return l.IntersectHalfLine(h)
 }
 
+// IntersectHalfLine returns intersections with another half line
 func (h *HalfLine) IntersectHalfLine(h2 *HalfLine) *Intersection {
 	// intersect as if it is a line
 	intersection := h.IntersectLine(NewLineFromHalfLine(h2))
@@ -83,6 +91,7 @@ func (h *HalfLine) IntersectHalfLine(h2 *HalfLine) *Intersection {
 	return NewIntersection()
 }
 
+// IntersectSegment returns intersections with a segment
 func (h *HalfLine) IntersectSegment(s *Segment) *Intersection {
 	// intersect as if it is a line
 	intersection := h.IntersectLine(NewLineFromSegment(s))
@@ -98,10 +107,12 @@ func (h *HalfLine) IntersectSegment(s *Segment) *Intersection {
 	return NewIntersection()
 }
 
+// IntersectCircle returns intersections with a circle
 func (h *HalfLine) IntersectCircle(c *Circle) *Intersection {
 	return c.IntersectHalfLine(h)
 }
 
+// GetRandomPoint returns a random point on the half line
 func (h *HalfLine) GetRandomPoint() *Point {
 	v := h.direction.Clone()
 	v.SetLength(rand.Float64() * configs.RandomPointRange)
