@@ -1,18 +1,19 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/water-vapor/euclidea-solver)](https://goreportcard.com/report/github.com/water-vapor/euclidea-solver)
 [![Build Status](https://travis-ci.org/water-vapor/euclidea-solver.svg?branch=master)](https://travis-ci.org/water-vapor/euclidea-solver)
+[![GoDoc](https://godoc.org/github.com/water-vapor/euclidea-solver?status.svg)](https://godoc.org/github.com/water-vapor/euclidea-solver)
 # Eulidea Solver
 Euclidea Solver is a brute force search program aimed to search for short solutions of straightedge and compass construction problems in [Euclidea](https://www.euclidea.xyz). 
 It performs searches by traveling the whole sensible search space with depth-first search.
 ### Usage
-`euclidea-solver [-p[=parallel level]] <chapter number> <problem number>`
+`euclidea-solver [-p[=parallel level]] <chapter number> <problem number> [problem version]`
 
-`chapter number` and `problem number` refers to corresponding problems in the website. Sequential search is used by default.
+`chapter number` and `problem number` refers to corresponding problems in the website. `problem version` refers to `E` or `L` goal of a problem, the default is `E`. Sequential search is used by default.
 `-p` is equivalent to `-p=1`, this parallel level refers to the level in DFS. The number of go routines spawned is calculated 
 automatically and printed once the program starts, this number is not fully predictable but will grow with the parallel level 
 specified.
 
 ### Adding Problems
-All the problems are manually coded into `problem` package, I've only added a few examples (all examples are tested to be solvable), 
+All the problems should be manually coded into `problem` package, I've only added a few examples (all examples are tested to be solvable), 
 but I believe you can figure out how to describe a problem by looking at them. Don't forget to add the function name to `problem.go` 
 after adding a custom function. A detailed guide may be added later.
 

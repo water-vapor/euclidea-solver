@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// ParallelContext holds synchronous primitives and infomation used by solver
+// ParallelContext holds synchronous primitives and information used by solver
 type ParallelContext struct {
 	parallelLevel int
 	Wg            *sync.WaitGroup

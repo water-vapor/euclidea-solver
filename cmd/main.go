@@ -103,7 +103,7 @@ func main() {
 
 	ctx := solver.NewParallelContext(parallelLevel)
 
-	solver.Solve(st.Board, goalSequence, 0,st,ctx)
+	solver.Solve(st.Board, goalSequence, 0, st, ctx)
 
 	// if parallel is used, wait
 	if parallelLevel != 0 {

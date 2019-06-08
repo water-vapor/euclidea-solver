@@ -58,6 +58,26 @@ func GetProblemByID(chapter, number int, goal string) *Statement {
 		statement = circleCenter()
 	case 107:
 		statement = inscribedSquare()
+	case 201:
+		statement = angleBisector()
+	case 202:
+		statement = intersectionOfAngleBisectors()
+	case 203:
+		statement = angleOf30Degree()
+	case 204:
+		statement = doubleAngle()
+	case 205:
+		statement = cutRectangle()
+	case 206:
+		statement = dropAPerpendicular()
+	case 207:
+		statement = erectAPerpendicular()
+	case 208:
+		statement = tangentToCircleAtPoint()
+	case 209:
+		statement = circleTangentToLine()
+	case 210:
+		statement = circleInRhombus()
 	case 1012:
 		statement = centerOfRotation()
 	case 1508:
