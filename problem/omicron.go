@@ -15,10 +15,12 @@ func lineCircleIntersection2() *Statement {
 	problem.AddPoint(pt1)
 	problem.AddPoint(pt2)
 
-	target := geom.NewGoal()
+	target := geom.NewTarget()
 	target.Points.Add(pt3)
 	target.Points.Add(pt4)
-	return NewStatement(problem, target, "OOOOOOO", "15.8 Line-Circle Intersection 2")
+
+	sequences := map[string]string{"E": "OOOOOOO"}
+	return NewStatement(problem, target, sequences, "15.8 Line-Circle Intersection 2")
 }
 
 //Problem 10: Angle of 3 Degree
@@ -31,8 +33,9 @@ func angelOf3Degree() *Statement {
 	problem.AddPoint(pt1)
 	problem.AddHalfLine(hl)
 
-	target := geom.NewGoal()
+	target := geom.NewTarget()
 	target.Lines.Add(geom.NewLineFromTwoPoints(pt1, pt2))
 
-	return NewStatement(problem, target, "OOOIIOI", "15.10 Angle of 3 Degree")
+	sequences := map[string]string{"E": "OOOIIOI"}
+	return NewStatement(problem, target, sequences, "15.10 Angle of 3 Degree")
 }

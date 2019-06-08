@@ -6,7 +6,6 @@ import (
 	"github.com/water-vapor/euclidea-solver/problem"
 	"os"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -20,10 +19,38 @@ func printUsageAndExit() {
 	os.Exit(0)
 }
 
+func parsePArgs(cmdOption string) int {
+	// process parallel arguments
+	// parallel level = 0 -> sequential
+	// use level 1 as default
+	var parallelLevel int
+	if cmdOption == "-p" {
+		parallelLevel = 1
+	} else if cmdOption[:3] == "-p=" {
+		parallelLevel, _ = strconv.Atoi(cmdOption[3:])
+		if parallelLevel <= 0 {
+			fmt.Println("Number of parallel level too small, resetting to 1.")
+			parallelLevel = 1
+		}
+	} else {
+		fmt.Println("Invalid argument!")
+		printUsageAndExit()
+	}
+	return parallelLevel
+}
+
+func parseInt(str string) int {
+	result, err := strconv.Atoi(str)
+	if err != nil {
+		printUsageAndExit()
+	}
+	return result
+}
+
 // handle command line arguments
-func processArgs(args []string) (int, int, int) {
+func parseArgs(args []string) (int, int, int, string) {
 	argumentLength := len(args)
-	var cmdOption string
+	var cmdOption, goal string
 	var parallelLevel int
 	var chapter, number int
 	switch argumentLength {
@@ -31,59 +58,60 @@ func processArgs(args []string) (int, int, int) {
 		fmt.Println("No argument!")
 		printUsageAndExit()
 	case 3:
-		chapter, _ = strconv.Atoi(args[1])
-		number, _ = strconv.Atoi(args[2])
+		chapter = parseInt(args[1])
+		number = parseInt(args[2])
 		parallelLevel = 0
+		goal = "E"
 	case 4:
-		cmdOption = args[1]
-		chapter, _ = strconv.Atoi(args[2])
-		number, _ = strconv.Atoi(args[3])
-		// process parallel arguments
-		// parallel level = 0 -> sequential
-		// use level 1 as default
-		if cmdOption == "-p" {
-			parallelLevel = 1
-		} else if cmdOption[:3] == "-p=" {
-			parallelLevel, _ = strconv.Atoi(cmdOption[3:])
-			if parallelLevel <= 0 {
-				fmt.Println("Number of parallel level too small, resetting to 1.")
-				parallelLevel = 1
-			}
+		if args[1][:2] == "-p" {
+			cmdOption = args[1]
+			chapter = parseInt(args[2])
+			number = parseInt(args[3])
+			parallelLevel = parsePArgs(cmdOption)
+			goal = "E"
 		} else {
-			fmt.Println("Invalid argument!")
-			printUsageAndExit()
+			chapter = parseInt(args[1])
+			number = parseInt(args[2])
+			goal = args[3]
+			parallelLevel = 0
 		}
+	case 5:
+		cmdOption = args[1]
+		chapter = parseInt(args[2])
+		number = parseInt(args[3])
+		goal = args[4]
+		parallelLevel = parsePArgs(cmdOption)
 	default:
 		fmt.Println("Incorrect number of arguments!")
 		printUsageAndExit()
 	}
-	return parallelLevel, chapter, number
+	return parallelLevel, chapter, number, goal
 }
 
 func main() {
 
-	parallelLevel, chapter, number := processArgs(os.Args)
+	parallelLevel, chapter, number, goal := parseArgs(os.Args)
 
-	success := make(chan interface{})
-	var wg sync.WaitGroup
-
-	ps := problem.GetProblemByID(chapter, number)
-	if parallelLevel >= len(ps.Sequence) {
-		fmt.Println("Parallel level too deep for this problem, using ", len(ps.Sequence)-1)
-		parallelLevel = len(ps.Sequence) - 1
+	st := problem.GetProblemByID(chapter, number, goal)
+	goalSequence := st.GetSequenceByGoal()
+	if parallelLevel >= len(goalSequence) {
+		fmt.Println("Parallel level too deep for this problem, using ", len(goalSequence)-1)
+		parallelLevel = len(goalSequence) - 1
 	}
 
 	start := time.Now()
 
-	solver.Solve(ps.Board, ps.Target, ps.Sequence, ps.Name, 0, success, &wg, parallelLevel)
+	ctx := solver.NewParallelContext(parallelLevel)
+
+	solver.Solve(st.Board, goalSequence, 0,st,ctx)
 
 	// if parallel is used, wait
 	if parallelLevel != 0 {
-		wg.Wait()
+		ctx.Wg.Wait()
 	}
 	// output search result in console
 	select {
-	case <-success:
+	case <-ctx.Success:
 		fmt.Println("Solution found!")
 	default:
 		fmt.Println("Solution not found.")

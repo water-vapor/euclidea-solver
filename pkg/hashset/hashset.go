@@ -1,3 +1,4 @@
+// Package hashset implements a hash set with built in map
 package hashset
 
 // Serializable is an interface represents Serializable objects

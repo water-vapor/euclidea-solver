@@ -1,3 +1,4 @@
+// Package geom provides geometric primitives and containers
 package geom
 
 import (

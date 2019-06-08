@@ -14,9 +14,11 @@ func angelOf60Degree() *Statement {
 	problem.AddPoint(pt1)
 	problem.HalfLines.Add(geom.NewHalfLineFromDirection(pt1, geom.NewVector2D(1, 0)))
 
-	target := geom.NewGoal()
+	target := geom.NewTarget()
 	target.Lines.Add(geom.NewLineFromTwoPoints(pt1, pt2))
-	return NewStatement(problem, target, "OOI", "1.1 Angel Of 60 Degree")
+
+	sequences := map[string]string{"E": "OOI"}
+	return NewStatement(problem, target, sequences, "1.1 Angel Of 60 Degree")
 }
 
 //Problem 2: Perpendicular Bisector
@@ -29,9 +31,11 @@ func perpendicularBisector() *Statement {
 
 	problem.AddSegment(s)
 
-	target := geom.NewGoal()
+	target := geom.NewTarget()
 	target.Lines.Add(l)
-	return NewStatement(problem, target, "OOI", "1.2 Perpendicular Bisector")
+
+	sequences := map[string]string{"E": "OOI"}
+	return NewStatement(problem, target, sequences, "1.2 Perpendicular Bisector")
 }
 
 //Problem 3: Midpoint
@@ -43,9 +47,11 @@ func midpoint() *Statement {
 	problem.AddPoint(pt2)
 
 	pt3 := geom.NewPoint(0, 0)
-	target := geom.NewGoal()
+	target := geom.NewTarget()
 	target.Points.Add(pt3)
-	return NewStatement(problem, target, "I+", "1.3 Midpoint")
+
+	sequences := map[string]string{"E": "I+"}
+	return NewStatement(problem, target, sequences, "1.3 Midpoint")
 }
 
 //Problem 4: Circle in Square
@@ -68,9 +74,11 @@ func circleInSquare() *Statement {
 	problem.AddSegment(s3)
 	problem.AddSegment(s4)
 
-	target := geom.NewGoal()
+	target := geom.NewTarget()
 	target.Circles.Add(geom.NewCircleByRadius(geom.NewPoint(0, 0), 1))
-	return NewStatement(problem, target, "I+O", "1.4 Circle in Square")
+
+	sequences := map[string]string{"E": "I+O"}
+	return NewStatement(problem, target, sequences, "1.4 Circle in Square")
 }
 
 //Problem 5: Rhombus in Rectangle
@@ -93,14 +101,16 @@ func rhombusInRectangle() *Statement {
 	problem.AddSegment(s3)
 	problem.AddSegment(s4)
 
-	target := geom.NewGoal()
+	target := geom.NewTarget()
 	pt5 := geom.NewPoint(2, 0)
 	pt6 := geom.NewPoint(1, math.Sqrt(3))
 	l1 := geom.NewLineFromTwoPoints(pt1, pt6)
 	l2 := geom.NewLineFromTwoPoints(pt5, pt3)
 	target.Lines.Add(l1)
 	target.Lines.Add(l2)
-	return NewStatement(problem, target, "+II", "1.5 Rhombus in Rectangle")
+
+	sequences := map[string]string{"E": "+II"}
+	return NewStatement(problem, target, sequences, "1.5 Rhombus in Rectangle")
 }
 
 //Problem 6: Circle Center
@@ -111,9 +121,11 @@ func circleCenter() *Statement {
 
 	problem.AddCircle(c)
 
-	target := geom.NewGoal()
+	target := geom.NewTarget()
 	target.Points.Add(pt1)
-	return NewStatement(problem, target, "OOOII", "1.6 Circle Center")
+
+	sequences := map[string]string{"E": "OOOII", "L": "++"}
+	return NewStatement(problem, target, sequences, "1.6 Circle Center")
 }
 
 //Problem 7: Inscribed Square
@@ -127,7 +139,7 @@ func inscribedSquare() *Statement {
 	problem.AddPoint(pt1)
 	problem.AddPoint(geom.NewPoint(0, 2))
 
-	target := geom.NewGoal()
+	target := geom.NewTarget()
 	pt2 := geom.NewPoint(2, 0)
 	pt3 := geom.NewPoint(-2, 0)
 	pt4 := geom.NewPoint(0, -2)
@@ -136,5 +148,7 @@ func inscribedSquare() *Statement {
 	target.Points.Add(pt4)
 	target.Lines.Add(geom.NewLineFromTwoPoints(pt2, pt4))
 	target.Lines.Add(geom.NewLineFromTwoPoints(pt3, pt4))
-	return NewStatement(problem, target, "OOIII", "1.7 Inscribed Square")
+
+	sequences := map[string]string{"E": "OOIII", "L": "I+IIII"}
+	return NewStatement(problem, target, sequences, "1.7 Inscribed Square")
 }

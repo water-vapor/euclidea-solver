@@ -22,8 +22,9 @@ func centerOfRotation() *Statement {
 	board.AddSegment(s1)
 	board.AddSegment(s2)
 
-	target := geom.NewGoal()
+	target := geom.NewTarget()
 	target.Points.Add(result)
 
-	return NewStatement(board, target, "OOIOI", "10.12 Center Of Rotation")
+	sequences := map[string]string{"E": "OOIOI"}
+	return NewStatement(board, target, sequences, "10.12 Center Of Rotation")
 }
