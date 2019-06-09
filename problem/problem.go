@@ -4,6 +4,7 @@ package problem
 import (
 	"fmt"
 	"github.com/water-vapor/euclidea-solver/pkg/geom"
+	"github.com/water-vapor/euclidea-solver/pkg/hashset"
 )
 
 // Statement is a type to describe a problem. Geometry objects in Board is given, objects in Target is the goal.
@@ -18,15 +19,27 @@ import (
 // Q: Copy a segment as radius and create a circle
 type Statement struct {
 	Board     *geom.Board
-	Target    *geom.Target
+	Target    *Target
 	Sequences map[string]string
 	Name      string
 	Goal      string
 }
 
 // NewStatement returns a new problem statement
-func NewStatement(board *geom.Board, target *geom.Target, sequences map[string]string, name string) *Statement {
+func NewStatement(board *geom.Board, target *Target, sequences map[string]string, name string) *Statement {
 	return &Statement{board, target, sequences, name, ""}
+}
+
+// Target is a type that holds the target of a problem, it can only include Points, Lines and Circles
+type Target struct {
+	Points  *hashset.HashSet
+	Lines   *hashset.HashSet
+	Circles *hashset.HashSet
+}
+
+// NewTarget return a new Target object
+func NewTarget() *Target {
+	return &Target{hashset.NewHashSet(), hashset.NewHashSet(), hashset.NewHashSet()}
 }
 
 // GetSequenceByGoal returns a hint sequence by goal name

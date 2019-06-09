@@ -16,7 +16,7 @@ func angleBisector() *Statement {
 	problem.HalfLines.Add(geom.NewHalfLineFromTwoPoints(pt1, pt2))
 	problem.HalfLines.Add(geom.NewHalfLineFromTwoPoints(pt1, pt3))
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	target.Lines.Add(geom.NewLineAsAngleBisector(pt2, pt1, pt3))
 
 	sequences := map[string]string{"E": "O+"}
@@ -36,14 +36,18 @@ func intersectionOfAngleBisectors() *Statement {
 	problem.AddLine(geom.NewLineFromTwoPoints(pt2, pt3))
 	problem.AddLine(geom.NewLineFromTwoPoints(pt1, pt3))
 
+	//hint for E: The first circle has 6 choices, but all are symmetric. Reduce that step.
+	c := geom.NewCircleByPoint(pt1, pt2)
+	problem.AddCircle(c)
+
 	l1 := geom.NewLineAsAngleBisector(pt1, pt2, pt3)
 	l2 := geom.NewLineAsAngleBisector(pt2, pt1, pt3)
 	pt4 := l1.IntersectLine(l2).Solutions[0]
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	target.Points.Add(pt4)
 
-	sequences := map[string]string{"E": "OOOIOI", "L": "AA"}
+	sequences := map[string]string{"E": "OOIOI", "L": "AA"}
 	return NewStatement(problem, target, sequences, "2.2 Intersection of Angle Bisectors")
 }
 
@@ -56,7 +60,7 @@ func angleOf30Degree() *Statement {
 	problem.AddPoint(pt1)
 	problem.HalfLines.Add(geom.NewHalfLineFromDirection(pt1, geom.NewVector2D(1, 0)))
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	target.Lines.Add(geom.NewLineFromTwoPoints(pt1, pt2))
 
 	sequences := map[string]string{"E": "OOI"}
@@ -74,7 +78,7 @@ func doubleAngle() *Statement {
 	problem.HalfLines.Add(geom.NewHalfLineFromTwoPoints(pt1, geom.NewPoint(1, 0)))
 	problem.HalfLines.Add(geom.NewHalfLineFromTwoPoints(pt1, pt2))
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	target.Lines.Add(geom.NewLineFromTwoPoints(pt1, pt3))
 	sequences := map[string]string{"E": "OOI"}
 	return NewStatement(problem, target, sequences, "2.4 Double Angle")
@@ -105,7 +109,7 @@ func cutRectangle() *Statement {
 	problem.AddLine(l4)
 	problem.AddPoint(ptx)
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	lx := geom.NewLineFromTwoPoints(ptx, pt5)
 	target.Lines.Add(lx)
 	sequences := map[string]string{"E": "III"}
@@ -120,7 +124,7 @@ func dropAPerpendicular() *Statement {
 	problem.AddLine(l)
 	problem.AddPoint(pt)
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	target.Lines.Add(geom.NewLineFromTwoPoints(geom.NewPoint(0, 0), pt))
 	sequences := map[string]string{"E": "OOI", "L": "O+"}
 	return NewStatement(problem, target, sequences, "2.6 Drop a Perpendicular")
@@ -139,7 +143,7 @@ func erectAPerpendicular() *Statement {
 	// problem.AddPoint(geom.NewPoint(-1, 0))
 	// problem.AddPoint(geom.NewPoint(1, 0))
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	target.Lines.Add(geom.NewLineFromTwoPoints(pt, geom.NewPoint(0, 1)))
 	sequences := map[string]string{"E": "OII", "L": "A"}
 	return NewStatement(problem, target, sequences, "2.7 Erect a Perpendicular")
@@ -157,7 +161,7 @@ func tangentToCircleAtPoint() *Statement {
 	// hint E: use an arbitrary point on the circle
 	problem.AddPoint(geom.NewPoint(0, -1))
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	target.Lines.Add(geom.NewLineFromTwoPoints(pt2, geom.NewPoint(1, 1)))
 	sequences := map[string]string{"E": "OOI", "L": "IL"}
 	return NewStatement(problem, target, sequences, "2.8 Tangent to Circle at Point")
@@ -173,7 +177,7 @@ func circleTangentToLine() *Statement {
 	problem.AddLine(l)
 	problem.AddPoint(pt3)
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	target.Circles.Add(geom.NewCircleByRadius(pt3, 1))
 	sequences := map[string]string{"E": "LO"}
 	return NewStatement(problem, target, sequences, "2.9 Circle Tangent to Line")
@@ -202,7 +206,7 @@ func circleInRhombus() *Statement {
 	problem.AddLine(l3)
 	problem.AddLine(l4)
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	target.Circles.Add(c)
 	sequences := map[string]string{"E": "IILO"}
 	return NewStatement(problem, target, sequences, "2.10 Circle in Rhombus")

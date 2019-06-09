@@ -14,7 +14,7 @@ func angelOf60Degree() *Statement {
 	problem.AddPoint(pt1)
 	problem.HalfLines.Add(geom.NewHalfLineFromDirection(pt1, geom.NewVector2D(1, 0)))
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	target.Lines.Add(geom.NewLineFromTwoPoints(pt1, pt2))
 
 	sequences := map[string]string{"E": "OOI"}
@@ -31,7 +31,7 @@ func perpendicularBisector() *Statement {
 
 	problem.AddSegment(s)
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	target.Lines.Add(l)
 
 	sequences := map[string]string{"E": "OOI"}
@@ -47,7 +47,7 @@ func midpoint() *Statement {
 	problem.AddPoint(pt2)
 
 	pt3 := geom.NewPoint(0, 0)
-	target := geom.NewTarget()
+	target := NewTarget()
 	target.Points.Add(pt3)
 
 	sequences := map[string]string{"E": "I+"}
@@ -74,7 +74,7 @@ func circleInSquare() *Statement {
 	problem.AddSegment(s3)
 	problem.AddSegment(s4)
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	target.Circles.Add(geom.NewCircleByRadius(geom.NewPoint(0, 0), 1))
 
 	sequences := map[string]string{"E": "I+O"}
@@ -101,7 +101,7 @@ func rhombusInRectangle() *Statement {
 	problem.AddSegment(s3)
 	problem.AddSegment(s4)
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	pt5 := geom.NewPoint(2, 0)
 	pt6 := geom.NewPoint(1, math.Sqrt(3))
 	l1 := geom.NewLineFromTwoPoints(pt1, pt6)
@@ -121,7 +121,7 @@ func circleCenter() *Statement {
 
 	problem.AddCircle(c)
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	target.Points.Add(pt1)
 
 	sequences := map[string]string{"E": "OOOII", "L": "++"}
@@ -139,7 +139,7 @@ func inscribedSquare() *Statement {
 	problem.AddPoint(pt1)
 	problem.AddPoint(geom.NewPoint(0, 2))
 
-	target := geom.NewTarget()
+	target := NewTarget()
 	pt2 := geom.NewPoint(2, 0)
 	pt3 := geom.NewPoint(-2, 0)
 	pt4 := geom.NewPoint(0, -2)
