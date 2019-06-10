@@ -10,12 +10,13 @@ import (
 )
 
 func printUsageAndExit() {
-	fmt.Println("Usage: euclidea-solver [-p[=parallel level]] <chapter number> <problem number>")
+	fmt.Println("Usage: euclidea-solver [-p[=parallel level]] <chapter number> <problem number> [problem version]")
 	fmt.Println("\t<chapter number> = integer, ID of chapter.")
 	fmt.Println("\t<problem number> = integer, ID of problem.")
 	fmt.Println("\t-p[=parallel level] = An optional flag to run the editor in its parallel version.")
 	fmt.Println("\t\tYou also have the option of specifying the threading level")
 	fmt.Println("\t[parallel level] = distribute work to parallel workers at tree level")
+	fmt.Println("\t[problem version] = the goal of the problem, typically L or E. Default is E.")
 	os.Exit(0)
 }
 
