@@ -17,8 +17,8 @@ func lineCircleIntersection2() *Statement {
 
 	// hints for E:
 	hc := geom.NewCircleByPoint(pt2, pt1)
-	pt5:=hc.IntersectCircle(c).Solutions[0]
-	hc2:=geom.NewCircleByPoint(pt5,pt1)
+	pt5 := hc.IntersectCircle(c).Solutions[0]
+	hc2 := geom.NewCircleByPoint(pt5, pt1)
 	problem.AddCircle(hc)
 	problem.AddCircle(hc2)
 	problem.AddPoint(pt5)

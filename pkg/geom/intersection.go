@@ -10,4 +10,3 @@ type Intersection struct {
 func NewIntersection(pts ...*Point) *Intersection {
 	return &Intersection{len(pts), pts}
 }
-
