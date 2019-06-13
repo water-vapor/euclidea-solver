@@ -11,18 +11,40 @@ import (
 	"time"
 )
 
+// Semaphore is a synchronous primitive that limits the number of go routines in buffer
+type Semaphore struct {
+	c chan struct{}
+}
+
+// NewSemaphore creates a new semaphore object
+func NewSemaphore(limit int) *Semaphore {
+	return &Semaphore{make(chan struct{}, limit)}
+}
+
+// Down should be called when adding an object to buffer
+func (s *Semaphore) Down() {
+	s.c <- struct{}{}
+}
+
+// Up should be called when removing an object to buffer
+func (s *Semaphore) Up() {
+	<-s.c
+}
+
 // ParallelContext holds synchronous primitives and information used by solver
 type ParallelContext struct {
 	parallelLevel int
 	Wg            *sync.WaitGroup
 	Success       chan interface{}
+	Sema          *Semaphore
 }
 
 // NewParallelContext creates a new ParallelContext
-func NewParallelContext(level int) *ParallelContext {
+func NewParallelContext(level int, threadLimit int) *ParallelContext {
 	success := make(chan interface{})
+	sema := NewSemaphore(threadLimit)
 	var wg sync.WaitGroup
-	return &ParallelContext{level, &wg, success}
+	return &ParallelContext{level, &wg, success, sema}
 }
 
 // Solve implements the DFS search algorithm
@@ -39,6 +61,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 	recursion := func() {
 		if useParallel && recursionLevel == ctx.parallelLevel-1 {
 			ctx.Wg.Add(1)
+			ctx.Sema.Down()
 			go Solve(newBoard, newSequence, recursionLevel+1, st, ctx)
 			count++
 		} else {
@@ -60,7 +83,14 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 	// signal wait groups on the level of go routines called
 	if useParallel && recursionLevel == ctx.parallelLevel {
 		defer ctx.Wg.Done()
+		defer ctx.Sema.Up()
 	}
+
+	// terminate subsequent calls after success
+	if shouldReturn() {
+		return
+	}
+
 	if configs.EarlyStop || len(sequence) == 0 {
 		solved := true
 		for _, elem := range st.Target.Points.Dict() {

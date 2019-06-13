@@ -5,12 +5,14 @@
 Euclidea Solver is a brute force search program aimed to search for short solutions of straightedge and compass construction problems in [Euclidea](https://www.euclidea.xyz). 
 It performs searches by traveling the whole sensible search space with depth-first search.
 ### Usage
-`euclidea-solver [-p[=parallel level]] <chapter number> <problem number> [problem version]`
+`euclidea-solver [-p[=parallel_level[,thread_limit]]] <chapter number> <problem number> [problem version]`
 
 `chapter number` and `problem number` refers to corresponding problems in the website. `problem version` refers to `E` or `L` goal of a problem, the default is `E`. Sequential search is used by default.
 `-p` is equivalent to `-p=1`, this parallel level refers to the level in DFS. The number of go routines spawned is calculated 
 automatically and printed once the program starts, this number is not fully predictable but will grow with the parallel level 
-specified.
+specified. The thread limit argument should be used when the number of spawned go routines is too large. For example, `-p=2,12` 
+limits the total number of go routines running simultaneously to be 12, even if 100 search routines were to be scheduled at 
+search level 2.
 
 ### Adding Problems
 All the problems should be manually coded into `problem` package, I've only added a few examples (all examples are tested to be solvable), 
