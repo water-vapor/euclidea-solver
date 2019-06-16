@@ -34,9 +34,9 @@ func (s *Semaphore) Up() {
 // ParallelContext holds synchronous primitives and information used by solver
 type ParallelContext struct {
 	parallelLevel int
-	Wg            *sync.WaitGroup
-	Success       chan interface{}
-	Sema          *Semaphore
+	wg            *sync.WaitGroup
+	success       chan interface{}
+	sema          *Semaphore
 }
 
 // NewParallelContext creates a new ParallelContext
@@ -60,8 +60,8 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 
 	recursion := func() {
 		if useParallel && recursionLevel == ctx.parallelLevel-1 {
-			ctx.Wg.Add(1)
-			ctx.Sema.Down()
+			ctx.wg.Add(1)
+			ctx.sema.Down()
 			go Solve(newBoard, newSequence, recursionLevel+1, st, ctx)
 			count++
 		} else {
@@ -72,7 +72,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 	shouldReturn := func() bool {
 		if (useParallel && recursionLevel >= ctx.parallelLevel) || !useParallel {
 			select {
-			case <-ctx.Success:
+			case <-ctx.success:
 				return true
 			default:
 			}
@@ -82,8 +82,23 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 
 	// signal wait groups on the level of go routines called
 	if useParallel && recursionLevel == ctx.parallelLevel {
-		defer ctx.Wg.Done()
-		defer ctx.Sema.Up()
+		defer ctx.wg.Done()
+		defer ctx.sema.Up()
+	}
+
+	// output result
+	if recursionLevel == 0 {
+		defer func() {
+			// output final result
+			if recursionLevel == 0 {
+				select {
+				case <-ctx.success:
+					fmt.Println("Solution found!")
+				default:
+					fmt.Println("Solution not found.")
+				}
+			}
+		}()
 	}
 
 	// terminate subsequent calls after success
@@ -113,14 +128,14 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 		}
 		if solved {
 			_ = board.GeneratePlot(st.Name + "_" + st.Goal + "_" + strconv.FormatInt(time.Now().Unix(), 10) + ".png")
-			// close the Success channel to indicate Success, all other routines should terminate
-			// return on Success
+			// close the success channel to indicate success, all other routines should terminate
+			// return on success
 			select {
 			// if already closed, just return
-			case <-ctx.Success:
+			case <-ctx.success:
 				return
 			default:
-				close(ctx.Success)
+				close(ctx.success)
 				return
 			}
 		}
@@ -368,5 +383,11 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 	if useParallel && recursionLevel == ctx.parallelLevel-1 {
 		fmt.Println(count, "go routines deployed.")
 	}
+
+	// if parallel is used, wait
+	if useParallel && recursionLevel == 0 {
+		ctx.wg.Wait()
+	}
+
 	return
 }

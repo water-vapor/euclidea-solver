@@ -130,18 +130,7 @@ func main() {
 
 	solver.Solve(st.Board, goalSequence, 0, st, ctx)
 
-	// if parallel is used, wait
-	if parallelLevel != 0 {
-		ctx.Wg.Wait()
-	}
-	// output search result in console
-	select {
-	case <-ctx.Success:
-		fmt.Println("Solution found!")
-	default:
-		fmt.Println("Solution not found.")
-	}
-
 	end := time.Since(start)
+
 	fmt.Println("Took", end)
 }
