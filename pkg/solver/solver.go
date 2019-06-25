@@ -8,6 +8,7 @@ import (
 	"github.com/water-vapor/euclidea-solver/problem"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -37,6 +38,7 @@ type ParallelContext struct {
 	wg            *sync.WaitGroup
 	success       chan interface{}
 	sema          *Semaphore
+	searchCount   int64
 }
 
 // NewParallelContext creates a new ParallelContext
@@ -44,7 +46,12 @@ func NewParallelContext(level int, threadLimit int) *ParallelContext {
 	success := make(chan interface{})
 	sema := NewSemaphore(threadLimit)
 	var wg sync.WaitGroup
-	return &ParallelContext{level, &wg, success, sema}
+	return &ParallelContext{level, &wg, success, sema, 0}
+}
+
+// GetSearchCount outputs the number of full searches
+func (ctx *ParallelContext) GetSearchCount() int64 {
+	return ctx.searchCount
 }
 
 // Solve implements the DFS search algorithm
@@ -126,6 +133,10 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 				solved = false
 			}
 		}
+
+		// statistics
+		atomic.AddInt64(&ctx.searchCount, 1)
+
 		if solved {
 			_ = board.GeneratePlot(st.Name + "_" + st.Goal + "_" + strconv.FormatInt(time.Now().Unix(), 10) + ".png")
 			// close the success channel to indicate success, all other routines should terminate
