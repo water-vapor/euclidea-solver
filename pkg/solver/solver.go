@@ -148,7 +148,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 		atomic.AddInt64(&ctx.searchCount, 1)
 
 		if solved {
-			_ = board.GeneratePlot(st.Name + "_" + st.Goal + "_" + strconv.FormatInt(time.Now().Unix(), 10) + ".png")
+			_ = board.GeneratePlot(st.Name + "_" + st.Goal + "_" + strconv.FormatInt(time.Now().Unix(), 10))
 			// close the success channel to indicate success, all other routines should terminate
 			// return on success
 			select {
@@ -162,7 +162,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 		}
 
 		if len(sequence) == 0 {
-			//_ = board.GeneratePlot("tmp_" + strconv.FormatInt(rand.Int63(), 10) + ".png")
+			//_ = board.GeneratePlot("tmp_" + strconv.FormatInt(rand.Int63(), 10))
 			return
 		}
 	}

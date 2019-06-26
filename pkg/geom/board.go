@@ -7,6 +7,7 @@ import (
 	"github.com/water-vapor/euclidea-solver/configs"
 	"github.com/water-vapor/euclidea-solver/pkg/hashset"
 	"math"
+	"os"
 )
 
 // Board is a geometry board containing all geometry objects
@@ -227,8 +228,25 @@ func (gb *Board) GenerateRandomPoints() []*Point {
 	return pts
 }
 
+func (gb *Board) GeneratePlot(folderName string) error {
+	tempBoard := gb.Clone()
+	err := os.Mkdir(folderName, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	for tempBoard.seqLen > 0 {
+		filename := fmt.Sprintf("%s/Step_%d.png", folderName, tempBoard.seqLen)
+		err = tempBoard.GenerateSinglePlot(filename, true)
+		if err != nil {
+			return err
+		}
+		tempBoard.RemoveLastGeometryObject()
+	}
+	return err
+}
+
 // GeneratePlot creates a plot file with fileName
-func (gb *Board) GeneratePlot(fileName string) error {
+func (gb *Board) GenerateSinglePlot(fileName string, highlight bool) error {
 	dc := gg.NewContext(configs.ImageSize, configs.ImageSize)
 	// p.Title.Text = "Graphics"
 
@@ -292,8 +310,7 @@ func (gb *Board) GeneratePlot(fileName string) error {
 		return r * configs.ImageSize / xyrange
 	}
 
-	for _, elem := range gb.Lines.Dict() {
-		l := elem.(*Line)
+	drawLine := func(l *Line) {
 		intersectionPoints := hashset.NewHashSet()
 		i1 := l.IntersectSegment(boundline1)
 		if i1.SolutionNumber != 0 {
@@ -325,10 +342,9 @@ func (gb *Board) GeneratePlot(fileName string) error {
 			pts = append(pts, pt)
 		}
 		dc.DrawLine(xCoordToImg(pts[0].x), yCoordToImg(pts[0].y), xCoordToImg(pts[1].x), yCoordToImg(pts[1].y))
-
 	}
-	for _, elem := range gb.HalfLines.Dict() {
-		h := elem.(*HalfLine)
+
+	drawHalfLine := func(h *HalfLine) {
 		var pt *Point
 		i1 := h.IntersectSegment(boundline1)
 		if i1.SolutionNumber != 0 {
@@ -347,7 +363,15 @@ func (gb *Board) GeneratePlot(fileName string) error {
 			pt = i4.Solutions[0]
 		}
 		dc.DrawLine(xCoordToImg(h.point.x), yCoordToImg(h.point.y), xCoordToImg(pt.x), yCoordToImg(pt.y))
+	}
 
+	for _, elem := range gb.Lines.Dict() {
+		l := elem.(*Line)
+		drawLine(l)
+	}
+	for _, elem := range gb.HalfLines.Dict() {
+		h := elem.(*HalfLine)
+		drawHalfLine(h)
 	}
 	for _, elem := range gb.Segments.Dict() {
 		s := elem.(*Segment)
@@ -359,6 +383,19 @@ func (gb *Board) GeneratePlot(fileName string) error {
 	}
 
 	dc.Stroke()
+	if highlight {
+		dc.SetRGB(1, 0, 0)
+		lastObjectIndex := gb.seqLen - 1
+		switch gb.geomType[lastObjectIndex] {
+		case 0:
+			c := gb.geomID[lastObjectIndex].(*Circle)
+			dc.DrawCircle(xCoordToImg(c.center.x), yCoordToImg(c.center.y), rCoordToImg(c.r))
+		case 1:
+			drawLine(gb.geomID[lastObjectIndex].(*Line))
+		default:
+		}
+		dc.Stroke()
+	}
 	err := dc.SavePNG(fileName)
 	return err
 }
