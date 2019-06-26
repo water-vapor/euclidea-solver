@@ -6,6 +6,7 @@ import (
 	"github.com/water-vapor/euclidea-solver/pkg/solver"
 	"github.com/water-vapor/euclidea-solver/problem"
 	"os"
+	"runtime"
 	"strconv"
 	"time"
 )
@@ -30,7 +31,7 @@ func main() {
 
 	useParallelPtr := flag.Bool("p", false, "Whether to enable parallel searching.")
 	parallelLevelPtr := flag.Int("l", 1, "Distribute work to parallel workers at tree level.")
-	threadLimitPtr := flag.Int("t", 100, "Max number of go routines running at any given time.")
+	threadLimitPtr := flag.Int("t", runtime.NumCPU(), "Max number of go routines running at any given time.")
 	problemVersionPtr := flag.String("v", "E", "The goal of the problem, typically L or E. Default is E.")
 
 	flag.Parse()

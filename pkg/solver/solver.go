@@ -74,7 +74,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 		}
 	}
 
-	recursion := func() {
+	recursion := func(shouldBacktrack bool) {
 		if shouldLaunchWorkers {
 			ctx.wg.Add(1)
 			ctx.sema.Down()
@@ -82,7 +82,9 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 			count++
 		} else {
 			Solve(newBoard, newSequence, recursionLevel+1, st, ctx)
-			newBoard.RemoveLastGeometryObject()
+			if shouldBacktrack {
+				newBoard.RemoveLastGeometryObject()
+			}
 		}
 	}
 
@@ -175,7 +177,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 			newBoard.AddPoint(pt)
 			// proceed without decreasing sequence
 			newSequence = sequence
-			recursion()
+			recursion(false)
 			if shouldReturn() {
 				return
 			}
@@ -202,7 +204,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 				newBoard = getNewBoard(board)
 				newBoard.AddCircleTrace(c)
 				newSequence = sequence[1:]
-				recursion()
+				recursion(true)
 				if shouldReturn() {
 					return
 				}
@@ -227,7 +229,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 				newBoard = getNewBoard(board)
 				newBoard.AddLineTrace(l)
 				newSequence = sequence[1:]
-				recursion()
+				recursion(true)
 
 				if shouldReturn() {
 					return
@@ -255,7 +257,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 					newBoard = getNewBoard(board)
 					newBoard.AddLineTrace(l)
 					newSequence = sequence[1:]
-					recursion()
+					recursion(true)
 					if shouldReturn() {
 						return
 					}
@@ -280,7 +282,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 				newBoard = getNewBoard(board)
 				newBoard.AddLineTrace(l)
 				newSequence = sequence[1:]
-				recursion()
+				recursion(true)
 				if shouldReturn() {
 					return
 				}
@@ -322,7 +324,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 			newBoard = getNewBoard(board)
 			newBoard.AddLine(tangentLine)
 			newSequence = sequence[1:]
-			recursion()
+			recursion(true)
 			if shouldReturn() {
 				return
 			}
@@ -363,7 +365,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 			newBoard = getNewBoard(board)
 			newBoard.AddLine(parallelLine)
 			newSequence = sequence[1:]
-			recursion()
+			recursion(true)
 			if shouldReturn() {
 				return
 			}
@@ -391,7 +393,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 					newBoard = getNewBoard(board)
 					newBoard.AddCircle(c)
 					newSequence = sequence[1:]
-					recursion()
+					recursion(true)
 					if shouldReturn() {
 						return
 					}
