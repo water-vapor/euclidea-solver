@@ -11,16 +11,25 @@ import (
 
 // Board is a geometry board containing all geometry objects
 type Board struct {
+	// real primitives
 	Points    *hashset.HashSet
 	Lines     *hashset.HashSet
 	Circles   *hashset.HashSet
 	HalfLines *hashset.HashSet
 	Segments  *hashset.HashSet
+	// type of constructed primitives in each step, 0 for circle and 1 for line
+	seqLen     int
+	geomType   []int
+	geomID     []hashset.Serializable
+	geomPoints [][]*Point
 }
 
 // NewBoard creates an empty geometry board
 func NewBoard() *Board {
-	return &Board{hashset.NewHashSet(), hashset.NewHashSet(), hashset.NewHashSet(), hashset.NewHashSet(), hashset.NewHashSet()}
+	geomType := make([]int, configs.MaxSequenceLength)
+	geomID := make([]hashset.Serializable, configs.MaxSequenceLength)
+	geomPoints := make([][]*Point, configs.MaxSequenceLength)
+	return &Board{hashset.NewHashSet(), hashset.NewHashSet(), hashset.NewHashSet(), hashset.NewHashSet(), hashset.NewHashSet(), 0, geomType, geomID, geomPoints}
 }
 
 // Clone deep copies a geometry board
@@ -31,6 +40,12 @@ func (gb *Board) Clone() *Board {
 	ret.Circles = gb.Circles.Clone()
 	ret.HalfLines = gb.HalfLines.Clone()
 	ret.Segments = gb.Segments.Clone()
+	ret.seqLen = gb.seqLen
+	copy(ret.geomType, gb.geomType)
+	copy(ret.geomID, gb.geomID)
+	for i := 0; i < configs.MaxSequenceLength; i++ {
+		copy(ret.geomPoints[i], gb.geomPoints[i])
+	}
 	return ret
 }
 
@@ -57,34 +72,52 @@ func (gb *Board) AddSegment(s *Segment) {
 
 // AddCircle adds a circle and calculates its intersections with existing objects
 func (gb *Board) AddCircle(c *Circle) {
+	gb.addCircle(c, false)
+}
+
+// AddCircleTrace adds a circle and calculates its intersections with existing objects, adding it to highlight sequence
+func (gb *Board) AddCircleTrace(c *Circle) {
+	gb.addCircle(c, true)
+}
+
+func (gb *Board) addCircle(c *Circle, traceQ bool) {
 	// calculate new intersection points
+	tracedPoints := make([]*Point, 0)
+	processIntersection := func(inters *Intersection) {
+		for i := 0; i < inters.SolutionNumber; i++ {
+			if !gb.Points.Contains(inters.Solutions[i]) {
+				gb.AddPoint(inters.Solutions[i])
+				if traceQ {
+					tracedPoints = append(tracedPoints, inters.Solutions[i])
+				}
+			}
+		}
+	}
 	for _, elem := range gb.Circles.Dict() {
 		circle := elem.(*Circle)
 		inters := c.IntersectCircle(circle)
-		for i := 0; i < inters.SolutionNumber; i++ {
-			gb.AddPoint(inters.Solutions[i])
-		}
+		processIntersection(inters)
 	}
 	for _, elem := range gb.Lines.Dict() {
 		line := elem.(*Line)
 		inters := c.IntersectLine(line)
-		for i := 0; i < inters.SolutionNumber; i++ {
-			gb.AddPoint(inters.Solutions[i])
-		}
+		processIntersection(inters)
 	}
 	for _, elem := range gb.HalfLines.Dict() {
 		hl := elem.(*HalfLine)
 		inters := c.IntersectHalfLine(hl)
-		for i := 0; i < inters.SolutionNumber; i++ {
-			gb.AddPoint(inters.Solutions[i])
-		}
+		processIntersection(inters)
 	}
 	for _, elem := range gb.Segments.Dict() {
 		s := elem.(*Segment)
 		inters := c.IntersectSegment(s)
-		for i := 0; i < inters.SolutionNumber; i++ {
-			gb.AddPoint(inters.Solutions[i])
-		}
+		processIntersection(inters)
+	}
+	if traceQ {
+		gb.geomID[gb.seqLen] = c
+		gb.geomType[gb.seqLen] = 0
+		gb.geomPoints[gb.seqLen] = tracedPoints
+		gb.seqLen++
 	}
 	// Add circle in the end
 	gb.Circles.Add(c)
@@ -92,36 +125,84 @@ func (gb *Board) AddCircle(c *Circle) {
 
 // AddLine adds a line and calculates its intersections with existing objects
 func (gb *Board) AddLine(l *Line) {
+	gb.addLine(l, false)
+}
+
+// AddLineTrace adds a line and calculates its intersections with existing objects, adding it to highlight sequence
+func (gb *Board) AddLineTrace(l *Line) {
+	gb.addLine(l, true)
+}
+
+func (gb *Board) processIntersection(inters *Intersection, traceQ bool) {
+
+}
+
+func (gb *Board) addLine(l *Line, traceQ bool) {
 	// calculate new intersection points
+	tracedPoints := make([]*Point, 0)
+	processIntersection := func(inters *Intersection) {
+		for i := 0; i < inters.SolutionNumber; i++ {
+			if !gb.Points.Contains(inters.Solutions[i]) {
+				gb.AddPoint(inters.Solutions[i])
+				if traceQ {
+					tracedPoints = append(tracedPoints, inters.Solutions[i])
+				}
+			}
+		}
+	}
 	for _, elem := range gb.Circles.Dict() {
 		circle := elem.(*Circle)
 		inters := l.IntersectCircle(circle)
-		for i := 0; i < inters.SolutionNumber; i++ {
-			gb.AddPoint(inters.Solutions[i])
-		}
+		processIntersection(inters)
 	}
 	for _, elem := range gb.Lines.Dict() {
 		line := elem.(*Line)
 		inters := l.IntersectLine(line)
-		for i := 0; i < inters.SolutionNumber; i++ {
-			gb.AddPoint(inters.Solutions[i])
-		}
+		processIntersection(inters)
 	}
 	for _, elem := range gb.HalfLines.Dict() {
 		hl := elem.(*HalfLine)
 		inters := l.IntersectHalfLine(hl)
-		for i := 0; i < inters.SolutionNumber; i++ {
-			gb.AddPoint(inters.Solutions[i])
-		}
+		processIntersection(inters)
 	}
 	for _, elem := range gb.Segments.Dict() {
 		s := elem.(*Segment)
 		inters := l.IntersectSegment(s)
-		for i := 0; i < inters.SolutionNumber; i++ {
-			gb.AddPoint(inters.Solutions[i])
-		}
+		processIntersection(inters)
+	}
+	if traceQ {
+		gb.geomID[gb.seqLen] = l
+		gb.geomType[gb.seqLen] = 1
+		gb.geomPoints[gb.seqLen] = tracedPoints
+		gb.seqLen++
 	}
 	gb.Lines.Add(l)
+}
+
+// RemoveLastGeometryObject removes the last line or circle in the output sequence
+func (gb *Board) RemoveLastGeometryObject() {
+	gb.seqLen--
+	if gb.seqLen < 0 {
+		panic("Remove level too deep")
+	}
+	// remove points associated
+	for _, elem := range gb.geomPoints[gb.seqLen] {
+		gb.Points.Remove(elem)
+	}
+
+	// remove geometry object associated
+	switch gb.geomType[gb.seqLen] {
+	case 0:
+		gb.Circles.Remove(gb.geomID[gb.seqLen])
+	case 1:
+		gb.Lines.Remove(gb.geomID[gb.seqLen])
+	default:
+		panic("Removing an unsupported object.")
+	}
+
+	// garbage collect
+	gb.geomID[gb.seqLen] = nil
+	gb.geomPoints[gb.seqLen] = nil
 }
 
 // GenerateRandomPoints returns a set of random points, from each geometry object

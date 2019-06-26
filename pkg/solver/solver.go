@@ -61,18 +61,28 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 	// This happens every step if early stopping is enabled,
 	// or the search sequence is exhausted.
 	useParallel := ctx.parallelLevel != 0
+	shouldLaunchWorkers := useParallel && recursionLevel == ctx.parallelLevel-1
 	count := 0
 	var newBoard *geom.Board
 	var newSequence string
 
+	getNewBoard := func(b *geom.Board) *geom.Board {
+		if shouldLaunchWorkers {
+			return b.Clone()
+		} else {
+			return b
+		}
+	}
+
 	recursion := func() {
-		if useParallel && recursionLevel == ctx.parallelLevel-1 {
+		if shouldLaunchWorkers {
 			ctx.wg.Add(1)
 			ctx.sema.Down()
 			go Solve(newBoard, newSequence, recursionLevel+1, st, ctx)
 			count++
 		} else {
 			Solve(newBoard, newSequence, recursionLevel+1, st, ctx)
+			newBoard.RemoveLastGeometryObject()
 		}
 	}
 
@@ -189,8 +199,8 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 				if board.Circles.Contains(c) {
 					continue
 				}
-				newBoard = board.Clone()
-				newBoard.AddCircle(c)
+				newBoard = getNewBoard(board)
+				newBoard.AddCircleTrace(c)
 				newSequence = sequence[1:]
 				recursion()
 				if shouldReturn() {
@@ -214,10 +224,11 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 				if board.Lines.Contains(l) {
 					continue
 				}
-				newBoard = board.Clone()
-				newBoard.AddLine(l)
+				newBoard = getNewBoard(board)
+				newBoard.AddLineTrace(l)
 				newSequence = sequence[1:]
 				recursion()
+
 				if shouldReturn() {
 					return
 				}
@@ -241,8 +252,8 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 					if board.Lines.Contains(l) {
 						continue
 					}
-					newBoard = board.Clone()
-					newBoard.AddLine(l)
+					newBoard = getNewBoard(board)
+					newBoard.AddLineTrace(l)
 					newSequence = sequence[1:]
 					recursion()
 					if shouldReturn() {
@@ -266,8 +277,8 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 				if board.Lines.Contains(l) {
 					continue
 				}
-				newBoard = board.Clone()
-				newBoard.AddLine(l)
+				newBoard = getNewBoard(board)
+				newBoard.AddLineTrace(l)
 				newSequence = sequence[1:]
 				recursion()
 				if shouldReturn() {
@@ -308,7 +319,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 			if board.Lines.Contains(tangentLine) {
 				continue
 			}
-			newBoard = board.Clone()
+			newBoard = getNewBoard(board)
 			newBoard.AddLine(tangentLine)
 			newSequence = sequence[1:]
 			recursion()
@@ -349,7 +360,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 			if board.Lines.Contains(parallelLine) {
 				continue
 			}
-			newBoard = board.Clone()
+			newBoard = getNewBoard(board)
 			newBoard.AddLine(parallelLine)
 			newSequence = sequence[1:]
 			recursion()
@@ -377,7 +388,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 					if board.Circles.Contains(c) {
 						continue
 					}
-					newBoard = board.Clone()
+					newBoard = getNewBoard(board)
 					newBoard.AddCircle(c)
 					newSequence = sequence[1:]
 					recursion()

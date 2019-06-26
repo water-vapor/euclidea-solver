@@ -63,7 +63,7 @@ func main() {
 
 	solver.Solve(st.Board, goalSequence, 0, st, ctx)
 
-	fmt.Println("Number of board searched:", ctx.GetSearchCount())
+	fmt.Println("Number of boards searched:", ctx.GetSearchCount())
 
 	end := time.Since(start)
 

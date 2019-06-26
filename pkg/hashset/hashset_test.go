@@ -39,6 +39,7 @@ func TestHashSet_Remove(t *testing.T) {
 	a.Add(pt2)
 	a.Add(pt3)
 	a.Remove(pt1)
+	a.Remove(pt1)
 	if len(a.m) != 1 {
 		t.Errorf("Add: got %d instead of 1", len(a.m))
 	}

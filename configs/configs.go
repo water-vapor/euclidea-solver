@@ -15,4 +15,6 @@ const (
 	MaxPointCoord = 1e3
 	// RandomPointRange is the initiating coordinate range of a random point
 	RandomPointRange = 10
+	// MaxSequenceLength is the maximum length of the hint sequence
+	MaxSequenceLength = 100
 )
