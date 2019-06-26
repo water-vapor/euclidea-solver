@@ -69,9 +69,8 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 	getNewBoard := func(b *geom.Board) *geom.Board {
 		if shouldLaunchWorkers {
 			return b.Clone()
-		} else {
-			return b
 		}
+		return b
 	}
 
 	recursion := func(shouldBacktrack bool) {

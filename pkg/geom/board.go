@@ -228,6 +228,7 @@ func (gb *Board) GenerateRandomPoints() []*Point {
 	return pts
 }
 
+// GeneratePlot creates a folder of plots showing steps of the construction
 func (gb *Board) GeneratePlot(folderName string) error {
 	tempBoard := gb.Clone()
 	err := os.Mkdir(folderName, os.ModePerm)
@@ -245,7 +246,7 @@ func (gb *Board) GeneratePlot(folderName string) error {
 	return err
 }
 
-// GeneratePlot creates a plot file with fileName
+// GenerateSinglePlot creates a plot file with fileName
 func (gb *Board) GenerateSinglePlot(fileName string, highlight bool) error {
 	dc := gg.NewContext(configs.ImageSize, configs.ImageSize)
 	// p.Title.Text = "Graphics"
