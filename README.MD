@@ -34,10 +34,10 @@ Number of boards searched: 112902489
 Took 2m27.098416518s
 ```
 A folder `15.10 Angle of 3 Degree_E_1561528019` is created, with the following images inside:
-![step_1](images/15.10 Angle of 3 Degree_E_1561528019/Step_1.png)
-![step_2](images/15.10 Angle of 3 Degree_E_1561528019/Step_2.png)
-![step_3](images/15.10 Angle of 3 Degree_E_1561528019/Step_3.png)
-![step_4](images/15.10 Angle of 3 Degree_E_1561528019/Step_4.png)
-![step_5](images/15.10 Angle of 3 Degree_E_1561528019/Step_5.png)
-![step_6](images/15.10 Angle of 3 Degree_E_1561528019/Step_6.png)
-![step_7](images/15.10 Angle of 3 Degree_E_1561528019/Step_7.png)
+<img src="images/15.10&#32;Angle&#32;of&#32;3&#32;Degree_E_1561528019/Step_1.png" alt="step_1" width="500"/>
+<img src="images/15.10&#32;Angle&#32;of&#32;3&#32;Degree_E_1561528019/Step_2.png" alt="step_2" width="500"/>
+<img src="images/15.10&#32;Angle&#32;of&#32;3&#32;Degree_E_1561528019/Step_3.png" alt="step_3" width="500"/>
+<img src="images/15.10&#32;Angle&#32;of&#32;3&#32;Degree_E_1561528019/Step_4.png" alt="step_4" width="500"/>
+<img src="images/15.10&#32;Angle&#32;of&#32;3&#32;Degree_E_1561528019/Step_5.png" alt="step_5" width="500"/>
+<img src="images/15.10&#32;Angle&#32;of&#32;3&#32;Degree_E_1561528019/Step_6.png" alt="step_6" width="500"/>
+<img src="images/15.10&#32;Angle&#32;of&#32;3&#32;Degree_E_1561528019/Step_7.png" alt="step_7" width="500"/>
