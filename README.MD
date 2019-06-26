@@ -9,7 +9,7 @@ It performs searches by traveling the whole sensible search space with depth-fir
 
 `chapter number` and `problem number` refers to corresponding problems in the website. `version` refers to `E` or `L` goal of a problem, the default is `E`. Sequential search is used by default.
 Flag `-p` turns on parallel searching. Flag `-l` refers to the level in DFS, on which the go routines will be spawned in parallel mode. The number of go routines spawned will grow with level but 
-not predictable. Flag `-t` limits the number of go routines running simultaneously, preventing the large overhead if too many go routines are spawned when level is deep. 
+is not fully predictable. Flag `-t` limits the number of go routines running simultaneously, preventing the large overhead if too many go routines are spawned when level is deep. 
 
 ### Adding Problems
 All the problems should be manually coded into `problem` package, I've only added a few examples (all examples are tested to be solvable), 
@@ -21,7 +21,8 @@ The current search algorithm does not include optimization or branch pruning of 
 a certain problem, just include them in the problem statement, and that will greatly reduce the search time.
 
 ### Example
-Here is an example to solve problem 15.10: Angle of 3 Degree.
+Here is an example to solve problem 15.10: Angle of 3 Degree. This experiment is run on a 48-core Xeon E5-2695v2 server, the search time may be 
+much larger on a personal computer.
 ```$bash
 $./euclidea-solver -p -l=4 15 10
 13 go routines deployed.
