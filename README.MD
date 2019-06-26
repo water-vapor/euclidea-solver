@@ -5,14 +5,11 @@
 Euclidea Solver is a brute force search program aimed to search for short solutions of straightedge and compass construction problems in [Euclidea](https://www.euclidea.xyz). 
 It performs searches by traveling the whole sensible search space with depth-first search.
 ### Usage
-`euclidea-solver [-p[=parallel_level[,thread_limit]]] <chapter number> <problem number> [problem version]`
+`euclidea-solver [-p] [-l level] [-t thread] [-v version] chapter_number problem_number`
 
-`chapter number` and `problem number` refers to corresponding problems in the website. `problem version` refers to `E` or `L` goal of a problem, the default is `E`. Sequential search is used by default.
-`-p` is equivalent to `-p=1`, this parallel level refers to the level in DFS. The number of go routines spawned is calculated 
-automatically and printed once the program starts, this number is not fully predictable but will grow with the parallel level 
-specified. The thread limit argument should be used when the number of spawned go routines is too large. For example, `-p=2,12` 
-limits the total number of go routines running simultaneously to be 12, while there could be hundreds of go routines were to be scheduled at 
-search level 2.
+`chapter number` and `problem number` refers to corresponding problems in the website. `version` refers to `E` or `L` goal of a problem, the default is `E`. Sequential search is used by default.
+Flag `-p` turns on parallel searching. Flag `-l` refers to the level in DFS, on which the go routines will be spawned in parallel mode. The number of go routines spawned will grow with level but 
+not predictable. Flag `-t` limits the number of go routines running simultaneously, preventing the large overhead if too many go routines are spawned when level is deep. 
 
 ### Adding Problems
 All the problems should be manually coded into `problem` package, I've only added a few examples (all examples are tested to be solvable), 
@@ -23,5 +20,24 @@ after adding a custom function. A detailed guide may be added later.
 The current search algorithm does not include optimization or branch pruning of any kind. If you have any good ideas for 
 a certain problem, just include them in the problem statement, and that will greatly reduce the search time.
 
-If you plan to use parallel searching, make sure the total number of go routine spawned is not much larger than your number of processor. 
-Otherwise it will be very slow.
+### Example
+Here is an example to solve problem 15.10: Angle of 3 Degree.
+```$bash
+$./euclidea-solver -p -l=4 15 10
+13 go routines deployed.
+13 go routines deployed.
+3 go routines deployed.
+22 go routines deployed.
+8 go routines deployed.
+Solution found!
+Number of boards searched: 112902489
+Took 2m27.098416518s
+```
+A folder `15.10 Angle of 3 Degree_E_1561528019` is created, with the following images inside:
+![step_1](images/15.10 Angle of 3 Degree_E_1561528019/Step_1.png)
+![step_2](images/15.10 Angle of 3 Degree_E_1561528019/Step_2.png)
+![step_3](images/15.10 Angle of 3 Degree_E_1561528019/Step_3.png)
+![step_4](images/15.10 Angle of 3 Degree_E_1561528019/Step_4.png)
+![step_5](images/15.10 Angle of 3 Degree_E_1561528019/Step_5.png)
+![step_6](images/15.10 Angle of 3 Degree_E_1561528019/Step_6.png)
+![step_7](images/15.10 Angle of 3 Degree_E_1561528019/Step_7.png)
