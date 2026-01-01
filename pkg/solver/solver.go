@@ -39,6 +39,7 @@ type ParallelContext struct {
 	success       chan interface{}
 	sema          *Semaphore
 	searchCount   int64
+	closeOnce     sync.Once // Ensures success channel is closed exactly once
 }
 
 // NewParallelContext creates a new ParallelContext
@@ -46,7 +47,7 @@ func NewParallelContext(level int, threadLimit int) *ParallelContext {
 	success := make(chan interface{})
 	sema := NewSemaphore(threadLimit)
 	var wg sync.WaitGroup
-	return &ParallelContext{level, &wg, success, sema, 0}
+	return &ParallelContext{parallelLevel: level, wg: &wg, success: success, sema: sema, searchCount: 0}
 }
 
 // GetSearchCount outputs the number of full searches
@@ -73,8 +74,22 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 		return b
 	}
 
+	// Check if solution was found (used at all levels for early termination)
+	isSolved := func() bool {
+		select {
+		case <-ctx.success:
+			return true
+		default:
+			return false
+		}
+	}
+
 	recursion := func(shouldBacktrack bool) {
 		if shouldLaunchWorkers {
+			// Check before spawning to avoid wasted work after solution found
+			if isSolved() {
+				return
+			}
 			ctx.wg.Add(1)
 			ctx.sema.Down()
 			go Solve(newBoard, newSequence, recursionLevel+1, st, ctx)
@@ -88,14 +103,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 	}
 
 	shouldReturn := func() bool {
-		if (useParallel && recursionLevel >= ctx.parallelLevel) || !useParallel {
-			select {
-			case <-ctx.success:
-				return true
-			default:
-			}
-		}
-		return false
+		return isSolved()
 	}
 
 	// signal wait groups on the level of go routines called
@@ -104,17 +112,27 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 		defer ctx.sema.Up()
 	}
 
-	// output result
-	if recursionLevel == 0 {
+	// At level 0, ensure we wait for workers and output result
+	if recursionLevel == 0 && useParallel {
+		// Defers run in LIFO order, so register output first, then wait
 		defer func() {
-			// output final result
-			if recursionLevel == 0 {
-				select {
-				case <-ctx.success:
-					fmt.Println("Solution found!")
-				default:
-					fmt.Println("Solution not found.")
-				}
+			select {
+			case <-ctx.success:
+				fmt.Println("Solution found!")
+			default:
+				fmt.Println("Solution not found.")
+			}
+		}()
+		// This runs BEFORE the output (LIFO) - ensures workers complete before reading searchCount
+		defer ctx.wg.Wait()
+	} else if recursionLevel == 0 {
+		// Non-parallel mode: just output result
+		defer func() {
+			select {
+			case <-ctx.success:
+				fmt.Println("Solution found!")
+			default:
+				fmt.Println("Solution not found.")
 			}
 		}()
 	}
@@ -130,18 +148,25 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 			pt := elem.(*geom.Point)
 			if !board.Points.Contains(pt) {
 				solved = false
+				break
 			}
 		}
-		for _, elem := range st.Target.Circles.Dict() {
-			c := elem.(*geom.Circle)
-			if !board.Circles.Contains(c) {
-				solved = false
+		if solved {
+			for _, elem := range st.Target.Circles.Dict() {
+				c := elem.(*geom.Circle)
+				if !board.Circles.Contains(c) {
+					solved = false
+					break
+				}
 			}
 		}
-		for _, elem := range st.Target.Lines.Dict() {
-			l := elem.(*geom.Line)
-			if !board.Lines.Contains(l) {
-				solved = false
+		if solved {
+			for _, elem := range st.Target.Lines.Dict() {
+				l := elem.(*geom.Line)
+				if !board.Lines.Contains(l) {
+					solved = false
+					break
+				}
 			}
 		}
 
@@ -149,17 +174,11 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 		atomic.AddInt64(&ctx.searchCount, 1)
 
 		if solved {
-			_ = board.GeneratePlot(st.Name + "_" + st.Goal + "_" + strconv.FormatInt(time.Now().Unix(), 10))
-			// close the success channel to indicate success, all other routines should terminate
-			// return on success
-			select {
-			// if already closed, just return
-			case <-ctx.success:
-				return
-			default:
+			ctx.closeOnce.Do(func() {
+				_ = board.GeneratePlot(st.Name + "_" + st.Goal + "_" + strconv.FormatInt(time.Now().Unix(), 10))
 				close(ctx.success)
-				return
-			}
+			})
+			return
 		}
 
 		if len(sequence) == 0 {
@@ -288,13 +307,14 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 			}
 		}
 	case 'L':
-		tangentLineCandidates := make([]*geom.Line, 0)
+		// Use map to dedupe candidates by hash (avoid exploring identical branches)
+		tangentLineSeen := make(map[interface{}]*geom.Line)
 		for _, elem1 := range board.Points.Values() {
 			pt := elem1.(*geom.Point)
 			for _, elem2 := range board.Lines.Values() {
 				l := elem2.(*geom.Line)
 				tangentLine := l.GetTangentLineWithPoint(pt)
-				tangentLineCandidates = append(tangentLineCandidates, tangentLine)
+				tangentLineSeen[tangentLine.Serialize()] = tangentLine
 			}
 			for _, elem2 := range board.HalfLines.Values() {
 				h := elem2.(*geom.HalfLine)
@@ -303,7 +323,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 					continue
 				}
 				tangentLine := l.GetTangentLineWithPoint(pt)
-				tangentLineCandidates = append(tangentLineCandidates, tangentLine)
+				tangentLineSeen[tangentLine.Serialize()] = tangentLine
 			}
 			for _, elem2 := range board.Segments.Values() {
 				s := elem2.(*geom.Segment)
@@ -312,16 +332,16 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 					continue
 				}
 				tangentLine := l.GetTangentLineWithPoint(pt)
-				tangentLineCandidates = append(tangentLineCandidates, tangentLine)
+				tangentLineSeen[tangentLine.Serialize()] = tangentLine
 			}
 		}
-		for _, tangentLine := range tangentLineCandidates {
+		for _, tangentLine := range tangentLineSeen {
 			// line already exists in set
 			if board.Lines.Contains(tangentLine) {
 				continue
 			}
 			newBoard = getNewBoard(board)
-			newBoard.AddLine(tangentLine)
+			newBoard.AddLineTrace(tangentLine)
 			newSequence = sequence[1:]
 			recursion(true)
 			if shouldReturn() {
@@ -329,13 +349,14 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 			}
 		}
 	case 'Z':
-		parallelLineCandidates := make([]*geom.Line, 0)
+		// Use map to dedupe candidates by hash (avoid exploring identical branches)
+		parallelLineSeen := make(map[interface{}]*geom.Line)
 		for _, elem1 := range board.Points.Values() {
 			pt := elem1.(*geom.Point)
 			for _, elem2 := range board.Lines.Values() {
 				l := elem2.(*geom.Line)
 				parallelLine := l.GetParallelLineWithPoint(pt)
-				parallelLineCandidates = append(parallelLineCandidates, parallelLine)
+				parallelLineSeen[parallelLine.Serialize()] = parallelLine
 			}
 			for _, elem2 := range board.HalfLines.Values() {
 				h := elem2.(*geom.HalfLine)
@@ -344,7 +365,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 					continue
 				}
 				parallelLine := l.GetParallelLineWithPoint(pt)
-				parallelLineCandidates = append(parallelLineCandidates, parallelLine)
+				parallelLineSeen[parallelLine.Serialize()] = parallelLine
 			}
 			for _, elem2 := range board.Segments.Values() {
 				s := elem2.(*geom.Segment)
@@ -353,16 +374,16 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 					continue
 				}
 				parallelLine := l.GetParallelLineWithPoint(pt)
-				parallelLineCandidates = append(parallelLineCandidates, parallelLine)
+				parallelLineSeen[parallelLine.Serialize()] = parallelLine
 			}
 		}
-		for _, parallelLine := range parallelLineCandidates {
+		for _, parallelLine := range parallelLineSeen {
 			// line already exists in set
 			if board.Lines.Contains(parallelLine) {
 				continue
 			}
 			newBoard = getNewBoard(board)
-			newBoard.AddLine(parallelLine)
+			newBoard.AddLineTrace(parallelLine)
 			newSequence = sequence[1:]
 			recursion(true)
 			if shouldReturn() {
@@ -390,7 +411,7 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 						continue
 					}
 					newBoard = getNewBoard(board)
-					newBoard.AddCircle(c)
+					newBoard.AddCircleTrace(c)
 					newSequence = sequence[1:]
 					recursion(true)
 					if shouldReturn() {
@@ -406,11 +427,4 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 	if useParallel && recursionLevel == ctx.parallelLevel-1 {
 		fmt.Println(count, "go routines deployed.")
 	}
-
-	// if parallel is used, wait
-	if useParallel && recursionLevel == 0 {
-		ctx.wg.Wait()
-	}
-
-	return
 }

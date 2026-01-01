@@ -42,9 +42,11 @@ func (gb *Board) Clone() *Board {
 	ret.HalfLines = gb.HalfLines.Clone()
 	ret.Segments = gb.Segments.Clone()
 	ret.seqLen = gb.seqLen
-	copy(ret.geomType, gb.geomType)
-	copy(ret.geomID, gb.geomID)
-	for i := 0; i < configs.MaxSequenceLength; i++ {
+	// Only copy up to seqLen instead of MaxSequenceLength
+	copy(ret.geomType[:gb.seqLen], gb.geomType[:gb.seqLen])
+	copy(ret.geomID[:gb.seqLen], gb.geomID[:gb.seqLen])
+	for i := 0; i < gb.seqLen; i++ {
+		ret.geomPoints[i] = make([]*Point, len(gb.geomPoints[i]))
 		copy(ret.geomPoints[i], gb.geomPoints[i])
 	}
 	return ret
@@ -83,7 +85,9 @@ func (gb *Board) AddCircleTrace(c *Circle) {
 
 func (gb *Board) addCircle(c *Circle, traceQ bool) {
 	// calculate new intersection points
-	tracedPoints := make([]*Point, 0)
+	// Pre-allocate: max 2 intersections per existing object
+	cap := 2 * (len(gb.Circles.Dict()) + len(gb.Lines.Dict()) + len(gb.HalfLines.Dict()) + len(gb.Segments.Dict()))
+	tracedPoints := make([]*Point, 0, cap)
 	processIntersection := func(inters *Intersection) {
 		for i := 0; i < inters.SolutionNumber; i++ {
 			if !gb.Points.Contains(inters.Solutions[i]) {
@@ -140,7 +144,9 @@ func (gb *Board) processIntersection(inters *Intersection, traceQ bool) {
 
 func (gb *Board) addLine(l *Line, traceQ bool) {
 	// calculate new intersection points
-	tracedPoints := make([]*Point, 0)
+	// Pre-allocate: max 2 intersections per circle, 1 per line/halfline/segment
+	cap := 2*len(gb.Circles.Dict()) + len(gb.Lines.Dict()) + len(gb.HalfLines.Dict()) + len(gb.Segments.Dict())
+	tracedPoints := make([]*Point, 0, cap)
 	processIntersection := func(inters *Intersection) {
 		for i := 0; i < inters.SolutionNumber; i++ {
 			if !gb.Points.Contains(inters.Solutions[i]) {
@@ -208,7 +214,9 @@ func (gb *Board) RemoveLastGeometryObject() {
 
 // GenerateRandomPoints returns a set of random points, from each geometry object
 func (gb *Board) GenerateRandomPoints() []*Point {
-	pts := make([]*Point, 0)
+	// Pre-allocate: one point per geometric object
+	cap := len(gb.Circles.Dict()) + len(gb.Lines.Dict()) + len(gb.HalfLines.Dict()) + len(gb.Segments.Dict())
+	pts := make([]*Point, 0, cap)
 	for _, elem := range gb.Circles.Dict() {
 		circle := elem.(*Circle)
 		pts = append(pts, circle.GetRandomPoint())
@@ -337,7 +345,7 @@ func (gb *Board) GenerateSinglePlot(fileName string, highlight bool) error {
 				fmt.Println(pt.x, pt.y)
 			}
 		}
-		pts := make([]*Point, 0)
+		pts := make([]*Point, 0, 2)
 		for _, elem := range intersectionPoints.Dict() {
 			pt := elem.(*Point)
 			pts = append(pts, pt)

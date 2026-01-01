@@ -50,6 +50,10 @@ func main() {
 	if !*useParallelPtr {
 		parallelLevel = 0
 	}
+	// Clamp threadLimit to >= 1 to prevent deadlock with zero-buffered semaphore
+	if threadLimit <= 0 {
+		threadLimit = runtime.NumCPU()
+	}
 
 	st := problem.GetProblemByID(chapter, number, goal)
 	goalSequence := st.GetSequenceByGoal()

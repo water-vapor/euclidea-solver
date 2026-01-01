@@ -12,19 +12,29 @@ type HalfLine struct {
 	hashset.Serializable
 	point     *Point
 	direction *Vector2D
+	hash      int64 // cached hash value
+}
+
+// computeHalfLineHash pre-computes the hash for a half line
+func computeHalfLineHash(pt *Point, dir *Vector2D) int64 {
+	cx := int64(math.Round(dir.x * configs.HashPrecision))
+	cy := int64(math.Round(dir.y * configs.HashPrecision))
+	cx0 := int64(math.Round(pt.x * configs.HashPrecision))
+	cy0 := int64(math.Round(pt.y * configs.HashPrecision))
+	return ((cx*configs.Prime+cy)*configs.Prime+cx0)*configs.Prime + cy0
 }
 
 // NewHalfLineFromTwoPoints creates a half line from two points, with source as end point
 func NewHalfLineFromTwoPoints(source *Point, direction *Point) *HalfLine {
 	v := NewVector2D(direction.x-source.x, direction.y-source.y)
 	v.Normalize()
-	return &HalfLine{point: source, direction: v}
+	return &HalfLine{point: source, direction: v, hash: computeHalfLineHash(source, v)}
 }
 
 // NewHalfLineFromDirection creates a half line from its end point and a direction
 func NewHalfLineFromDirection(pt *Point, direction *Vector2D) *HalfLine {
 	direction.Normalize()
-	return &HalfLine{point: pt, direction: direction}
+	return &HalfLine{point: pt, direction: direction, hash: computeHalfLineHash(pt, direction)}
 }
 
 // GetEndPoint returns its end point
@@ -32,13 +42,9 @@ func (h *HalfLine) GetEndPoint() *Point {
 	return h.point
 }
 
-// Serialize returns the hash of the half line
+// Serialize returns the cached hash of the half line
 func (h *HalfLine) Serialize() interface{} {
-	cx := int64(math.Round(h.direction.x * configs.HashPrecision))
-	cy := int64(math.Round(h.direction.y * configs.HashPrecision))
-	cx0 := int64(math.Round(h.point.x * configs.HashPrecision))
-	cy0 := int64(math.Round(h.point.y * configs.HashPrecision))
-	return ((cx*configs.Prime+cy)*configs.Prime+cx0)*configs.Prime + cy0
+	return h.hash
 }
 
 // PointInRange checks if a point is in the coordinates of a half line

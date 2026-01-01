@@ -11,6 +11,16 @@ import (
 type Segment struct {
 	hashset.Serializable
 	point1, point2 *Point
+	hash           int64 // cached hash value
+}
+
+// computeSegmentHash pre-computes the hash for a segment
+func computeSegmentHash(pt1, pt2 *Point) int64 {
+	cx1 := int64(math.Round(pt1.x * configs.HashPrecision))
+	cy1 := int64(math.Round(pt1.y * configs.HashPrecision))
+	cx2 := int64(math.Round(pt2.x * configs.HashPrecision))
+	cy2 := int64(math.Round(pt2.y * configs.HashPrecision))
+	return ((cx1*configs.Prime+cy1)*configs.Prime+cx2)*configs.Prime + cy2
 }
 
 // NewSegment creates a segment from two points
@@ -29,9 +39,9 @@ func NewSegment(pt1, pt2 *Point) *Segment {
 		pt1First = true
 	}
 	if pt1First {
-		return &Segment{point1: pt1, point2: pt2}
+		return &Segment{point1: pt1, point2: pt2, hash: computeSegmentHash(pt1, pt2)}
 	}
-	return &Segment{point1: pt2, point2: pt1}
+	return &Segment{point1: pt2, point2: pt1, hash: computeSegmentHash(pt2, pt1)}
 
 }
 
@@ -47,13 +57,9 @@ func (s *Segment) GetEndPoints() (*Point, *Point) {
 	return s.point1, s.point2
 }
 
-// Serialize returns the hash of the segment
+// Serialize returns the cached hash of the segment
 func (s *Segment) Serialize() interface{} {
-	cx1 := int64(math.Round(s.point1.x * configs.HashPrecision))
-	cy1 := int64(math.Round(s.point1.y * configs.HashPrecision))
-	cx2 := int64(math.Round(s.point2.x * configs.HashPrecision))
-	cy2 := int64(math.Round(s.point2.y * configs.HashPrecision))
-	return ((cx1*configs.Prime+cy1)*configs.Prime+cx2)*configs.Prime + cy2
+	return s.hash
 }
 
 // PointInRange checks whether a point is in the coordinates range of the segment

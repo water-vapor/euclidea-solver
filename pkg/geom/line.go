@@ -18,6 +18,7 @@ const (
 type Line struct {
 	hashset.Serializable
 	a, b, c float64
+	hash    int64 // cached hash value
 }
 
 // NewLineFromCoefficients creates a line from coefficients
@@ -38,7 +39,12 @@ func NewLineFromCoefficients(a, b, c float64) *Line {
 	a *= coeff
 	b *= coeff
 	c *= coeff
-	return &Line{a: a, b: b, c: c}
+	// Pre-compute hash at creation time
+	ca := int64(math.Round(a))
+	cb := int64(math.Round(b))
+	cc := int64(math.Round(c))
+	hash := (ca*configs.Prime+cb)*configs.Prime + cc
+	return &Line{a: a, b: b, c: c, hash: hash}
 }
 
 // NewLineFromTwoPoints creates a line from two points
@@ -82,12 +88,9 @@ func NewLineAsAngleBisector(pt1, pt2, pt3 *Point) *Line {
 	return NewSegment(inters1, inters2).Bisector()
 }
 
-// Serialize returns the hash of a line
+// Serialize returns the cached hash of a line
 func (l *Line) Serialize() interface{} {
-	ca := int64(math.Round(l.a))
-	cb := int64(math.Round(l.b))
-	cc := int64(math.Round(l.c))
-	return (ca*configs.Prime+cb)*configs.Prime + cc
+	return l.hash
 }
 
 // ContainsPoint checks whether a point is on the line

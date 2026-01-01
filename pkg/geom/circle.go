@@ -12,16 +12,26 @@ type Circle struct {
 	hashset.Serializable
 	center *Point
 	r      float64
+	hash   int64 // cached hash value
+}
+
+// computeCircleHash pre-computes the hash for a circle
+func computeCircleHash(center *Point, r float64) int64 {
+	cx := int64(math.Round(center.x * configs.HashPrecision))
+	cy := int64(math.Round(center.y * configs.HashPrecision))
+	cr := int64(math.Round(r * configs.HashPrecision))
+	return (cx*configs.Prime+cy)*configs.Prime + cr
 }
 
 // NewCircleByPoint creates a circle by its center and a point on its side
 func NewCircleByPoint(center, onSide *Point) *Circle {
-	return &Circle{center: center, r: NewSegment(center, onSide).Length()}
+	r := NewSegment(center, onSide).Length()
+	return &Circle{center: center, r: r, hash: computeCircleHash(center, r)}
 }
 
 // NewCircleByRadius creates a circle by its center and its radius
 func NewCircleByRadius(center *Point, r float64) *Circle {
-	return &Circle{center: center, r: r}
+	return &Circle{center: center, r: r, hash: computeCircleHash(center, r)}
 }
 
 // GetCenter returns the center of the circle
@@ -34,12 +44,9 @@ func (c *Circle) GetRadius() float64 {
 	return c.r
 }
 
-// Serialize returns the hash of the circle
+// Serialize returns the cached hash of the circle
 func (c *Circle) Serialize() interface{} {
-	cx := int64(math.Round(c.center.x * configs.HashPrecision))
-	cy := int64(math.Round(c.center.y * configs.HashPrecision))
-	cr := int64(math.Round(c.r * configs.HashPrecision))
-	return (cx*configs.Prime+cy)*configs.Prime + cr
+	return c.hash
 }
 
 // ContainsPoint checks if a point is on the circle

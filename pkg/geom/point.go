@@ -10,11 +10,16 @@ import (
 type Point struct {
 	hashset.Serializable
 	x, y float64
+	hash int64 // cached hash value
 }
 
 // NewPoint creates a point from coordinates
 func NewPoint(x, y float64) *Point {
-	return &Point{x: x, y: y}
+	// Pre-compute hash at creation time
+	ptx := int64(math.Round(x * configs.HashPrecision))
+	pty := int64(math.Round(y * configs.HashPrecision))
+	hash := ptx*configs.Prime + pty
+	return &Point{x: x, y: y, hash: hash}
 }
 
 // GetCoords returns its coordinates, should be only used for debugging
@@ -22,11 +27,9 @@ func (pt *Point) GetCoords() (float64, float64) {
 	return pt.x, pt.y
 }
 
-// Serialize returns the hash of a point
+// Serialize returns the cached hash of a point
 func (pt *Point) Serialize() interface{} {
-	ptx := int64(math.Round(pt.x * configs.HashPrecision))
-	pty := int64(math.Round(pt.y * configs.HashPrecision))
-	return ptx*configs.Prime + pty
+	return pt.hash
 }
 
 // OnLine checks if the point is on a line
