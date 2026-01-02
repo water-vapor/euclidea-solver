@@ -206,8 +206,11 @@ func Solve(board *geom.Board, sequence string, recursionLevel int,
 	switch sequence[0] {
 	case 'O':
 		// build circle based on existing points
-		for _, elem1 := range board.Points.Dict() {
-			for _, elem2 := range board.Points.Dict() {
+		// Use Values() to snapshot points - iterating Dict() while AddCircleTrace
+		// modifies the map is undefined behavior in Go
+		pointSet := board.Points.Values()
+		for _, elem1 := range pointSet {
+			for _, elem2 := range pointSet {
 				pt1 := elem1.(*geom.Point)
 				pt2 := elem2.(*geom.Point)
 				// same point object
